@@ -11,6 +11,10 @@
     <junit.version>5.13.4</junit.version>
     <h2.version>2.3.232</h2.version>
     <maven.surefire.version>3.5.3</maven.surefire.version>
+    <lombok.version>1.18.38</lombok.version>
+    <typesafe.version>1.4.3</typesafe.version>
+    <slf4j.version>2.0.17</slf4j.version>
+    <HikariCP.version>7.0.2</HikariCP.version>
   </properties>
 
   <dependencies>
@@ -19,7 +23,6 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${junit.version}</version>
-      <scope>test</scope>
     </dependency>
 
     <!-- H2 only for demo tests -->
@@ -29,8 +32,35 @@
       <version>${h2.version}</version>
       <scope>test</scope>
     </dependency>
-  </dependencies>
 
+    <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/com.typesafe/config -->
+    <dependency>
+        <groupId>com.typesafe</groupId>
+        <artifactId>config</artifactId>
+        <version>${typesafe.version}</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>${slf4j.version}</version>
+      </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${HikariCP.version}</version>
+        </dependency>
+  </dependencies>
+  
   <build>
     <plugins>
       <plugin>
