@@ -85,9 +85,15 @@ public class TableCompareExtension
 
         // Fail the test if there are any differences
         if (result.diffs > 0) {  
-            String reportLink = "file://" + reportPath.toAbsolutePath();
-            Allure.step("Table comparison failed: " + result.diffs + " differences found. " +
-            "<a href='" + reportLink + "' target='_blank'>Open Report</a>");
+            String reportLink = reportPath.toAbsolutePath().toString();
+            File report = new File(reportLink);
+            if (report.isFile()) {
+                try (FileInputStream fis = new FileInputStream(report)) {
+                    Allure.addAttachment("Table Compare Report", "text/html", fis, ".html");
+                }
+            } else {
+                Allure.step("No table-compare HTML found at: " + report.getAbsolutePath());
+            }
             throw new AssertionError(
                 "Table comparison failed: " + result.diffs + " differences found. "
                             + "See HTML report: " + reportLink);
