@@ -14,6 +14,7 @@
     <lombok.version>1.18.38</lombok.version>
     <typesafe.version>1.4.3</typesafe.version>
     <slf4j.version>2.0.17</slf4j.version>
+    <logback-classic.version>1.5.18</logback-classic.version>
     <HikariCP.version>7.0.2</HikariCP.version>
   </properties>
 
@@ -53,7 +54,13 @@
           <version>${slf4j.version}</version>
       </dependency>
 
-    <!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
+      <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-classic.version}</version>
+        </dependency>
+      <!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
