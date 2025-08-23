@@ -87,9 +87,7 @@ public class TableCompareExtension
         String reportLink = reportPath.toAbsolutePath().toString();
         File report = new File(reportLink);
         if (report.isFile()) {
-            try (FileInputStream fis = new FileInputStream(report)) {
-                Allure.addAttachment("Table Compare Report", "text/html", fis, ".html");
-            }
+            Allure.addAttachment("Table Compare Report", new FileInputStream(report));
         } else {
             Allure.step("No table-compare HTML found at: " + report.getAbsolutePath());
         }
