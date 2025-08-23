@@ -23,9 +23,9 @@ class DBConnectionFailingTest {
     static void createTables() {
         // Create tables with more fields
         db.executeUpdate(
-                "CREATE TABLE input (id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
+                "CREATE TABLE input (emp_id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
         db.executeUpdate(
-                "CREATE TABLE output (id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
+                "CREATE TABLE output (emp_id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
 
         // Clean tables before each test to avoid PK violation in repeated tests
         db.executeUpdate("DELETE FROM input");
@@ -76,10 +76,10 @@ class DBConnectionFailingTest {
             }
 
             db.executeUpdate(String.format(
-                    "INSERT INTO input (id, first_name, last_name, age, gender) VALUES (%d, '%s', '%s', %d, '%s')", i,
+                    "INSERT INTO input (emp_id, first_name, last_name, age, gender) VALUES (%d, '%s', '%s', %d, '%s')", i,
                     randomFirstName, randomLastName, age, gender));
             db.executeUpdate(String.format(
-                    "INSERT INTO output (id, first_name, last_name, age, gender) VALUES (%d, '%s', '%s', %d, '%s')", i,
+                    "INSERT INTO output (emp_id, first_name, last_name, age, gender) VALUES (%d, '%s', '%s', %d, '%s')", i,
                     outputFirstName, outputLastName, outputAge, outputGender));
         }
     }
@@ -96,11 +96,11 @@ class DBConnectionFailingTest {
         List<Map<String, String>> outputRows = db.executePreparedStatement("SELECT * FROM output");
 
         // Hand the rows to the extension so it can generate the HTML after the test finishes
-        TableCompareExtension.captureRows(inputRows, outputRows);
+        TableCompareExtension.captureRows(inputRows, outputRows, null, "EMP_ID");
     }
 
     @Test
-    void testAnotherCompareOfInputAndOutputTables() {
+    void testCompareOfInputAndOutputTables2() {
         // Added a duplicate test of above, just to check that parallel execution works when there are more than one tests in a class.
         List<Map<String, String>> inputRows = db.executePreparedStatement("SELECT * FROM input");
         List<Map<String, String>> outputRows = db.executePreparedStatement("SELECT * FROM output");

@@ -43,9 +43,20 @@ public class TableCompareExtension
     public static void captureRows(List<Map<String, String>> inputRows,
             List<Map<String, String>> outputRows,
             Set<String> ignoredFields, String idField) {
-        TL_CAPTURED.set(new Captured(inputRows, outputRows,
-                ignoredFields == null ? DEFAULT_IGNORED_FIELDS : ignoredFields,
-                idField == null ? DEFAULT_ID_FIELD : idField));
+
+        // ID should be upper case for it to be ignored.
+        String effectiveIdField = idField == null ? DEFAULT_ID_FIELD : idField.toUpperCase();
+
+        // ensure idField is always ignored in comparisons
+        Set<String> effectiveIgnoredFields = new HashSet<>();
+        if (ignoredFields != null) {
+            effectiveIgnoredFields.addAll(ignoredFields);
+        } else {
+            effectiveIgnoredFields.addAll(DEFAULT_IGNORED_FIELDS);
+        }
+        effectiveIgnoredFields.add(effectiveIdField);
+
+        TL_CAPTURED.set(new Captured(inputRows, outputRows, effectiveIgnoredFields, effectiveIdField));
     }
     
     @Override
@@ -209,78 +220,109 @@ public class TableCompareExtension
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<!doctype html><html><head><meta charset='utf-8'>");
         stringBuilder.append("<title>Table Compare Report - ").append(escape(displayName)).append("</title>");
-        stringBuilder.append("<style>");
-        stringBuilder.append("body{font-family:Arial,Helvetica,sans-serif;margin:20px;}");
-        stringBuilder.append("h1{margin:0 0 10px 0;font-size:20px;}");
-        stringBuilder.append(".meta{color:#555;margin-bottom:16px;font-size:12px;}");
-        stringBuilder.append("table{border-collapse:collapse;width:100%;}");
-        stringBuilder.append("th,td{border:1px solid #ddd;padding:6px;text-align:left;}");
-        stringBuilder.append("th{background:#f5f5f5;position:sticky;top:0;}");
-        stringBuilder.append("td.equal{background:#ffffff;}");
-        stringBuilder.append("td.diff{background:#ffcccc;}");
-        stringBuilder.append(".legend{margin:10px 0 16px 0;font-size:12px;}");
-        stringBuilder.append(".badge{display:inline-block;padding:2px 8px;border-radius:10px;background:#eee;margin-right:6px;}");
-        stringBuilder.append("</style></head><body>");
+        stringBuilder.append(renderStyle());
+        stringBuilder.append("</head><body>");
 
         stringBuilder.append("<h1>Table Compare Report</h1>");
-        stringBuilder.append("<div class='meta'>");
-        stringBuilder.append("<div><b>Class:</b> ").append(escape(className)).append("</div>");
-        stringBuilder.append("<div><b>Test:</b> ").append(escape(testName)).append("</div>");
-        stringBuilder.append("<div><b>Display name:</b> ").append(escape(displayName)).append("</div>");
-        stringBuilder.append("<div><b>Generated:</b> ").append(escape(timestamp)).append("</div>");
-        stringBuilder.append("</div>");
+        stringBuilder.append(renderMetaInfo(className, testName, displayName, timestamp));
+        stringBuilder.append(renderLegend(comparisonResult.rowsCompared, comparisonResult.cellsCompared, comparisonResult.diffs));
 
-        stringBuilder.append("<div class='legend'>");
-        stringBuilder.append("<span class='badge'>Rows: ").append(comparisonResult.rowsCompared).append("</span>");
-        stringBuilder.append("<span class='badge'>Cells: ").append(comparisonResult.cellsCompared).append("</span>");
-        stringBuilder.append("<span class='badge'>Diffs: ").append(comparisonResult.diffs).append("</span>");
-        stringBuilder.append("<span class='badge' style='background:#fff;border:1px solid #ddd;'>Equal</span>");
-        stringBuilder.append("<span class='badge' style='background:#ffcccc;'>Different</span>");
-        stringBuilder.append("</div>");
-
-        stringBuilder.append("<table><thead><tr>");
-        // Optional ID column if present
         boolean showId = comparisonResult.rows.stream().anyMatch(row -> row.id != null);
+        String idFieldName = testContext instanceof ExtensionContext ?
+            ((Captured)TL_CAPTURED.get()).idField : DEFAULT_ID_FIELD;
 
-        if (showId)
-            stringBuilder.append("<th>ID</th>");
-
-        for (String fieldName : comparisonResult.fields)
-            stringBuilder.append("<th>").append(escape(fieldName)).append("</th>");
-        stringBuilder.append("</tr></thead><tbody>");
-
-        for (Row row : comparisonResult.rows) {
-            stringBuilder.append("<tr>");
-            if (showId)
-                stringBuilder.append("<td>").append(escape(row.id == null ? "" : row.id)).append("</td>");
-            for (Cell resultCell : row.cells) {
-                String cls = resultCell.equal ? "equal" : "diff";
-                stringBuilder.append("<td class='").append(cls).append("'>");
-                // Show input -> output if different, else show value once
-                if (resultCell.equal) {
-                    stringBuilder.append(escape(orEmpty(resultCell.inputVal)));
-                } else {
-                    stringBuilder.append("<div><b>IN:</b> ").append(escape(orEmpty(resultCell.inputVal))).append("</div>");
-                    stringBuilder.append("<div><b>OUT:</b> ").append(escape(orEmpty(resultCell.outputVal))).append("</div>");
-                }
-                stringBuilder.append("</td>");
-            }
-            stringBuilder.append("</tr>");
-        }
-
-        stringBuilder.append("</tbody></table>");
+        stringBuilder.append("<table>");
+        stringBuilder.append(renderTableHeader(comparisonResult.fields, showId, idFieldName));
+        stringBuilder.append(renderTableBody(comparisonResult.rows, showId));
+        stringBuilder.append("</table>");
         stringBuilder.append("</body></html>");
         return stringBuilder.toString();
     }
 
-    private static String orEmpty(String s) {
-        return s == null ? "" : s;
+    private static String renderStyle() {
+        return "<style>" +
+                "body{font-family:Arial,Helvetica,sans-serif;margin:20px;}" +
+                "h1{margin:0 0 10px 0;font-size:20px;}" +
+                ".meta{color:#555;margin-bottom:16px;font-size:12px;}" +
+                "table{border-collapse:collapse;width:100%;}" +
+                "th,td{border:1px solid #ddd;padding:6px;text-align:left;}" +
+                "th{background:#f5f5f5;position:sticky;top:0;}" +
+                "td.equal{background:#ffffff;}" +
+                "td.diff{background:#ffcccc;}" +
+                ".legend{margin:10px 0 16px 0;font-size:12px;}" +
+                ".badge{display:inline-block;padding:2px 8px;border-radius:10px;background:#eee;margin-right:6px;}" +
+                "</style>";
     }
 
-    private static String escape(String s) {
-        if (s == null)
+    private static String renderMetaInfo(String className, String testName, String displayName, String timestamp) {
+        return "<div class='meta'>" +
+                "<div><b>Class:</b> " + escape(className) + "</div>" +
+                "<div><b>Test:</b> " + escape(testName) + "</div>" +
+                "<div><b>Display name:</b> " + escape(displayName) + "</div>" +
+                "<div><b>Generated:</b> " + escape(timestamp) + "</div>" +
+                "</div>";
+    }
+
+    private static String renderLegend(int rowsCompared, int cellsCompared, int diffs) {
+        return "<div class='legend'>" +
+                "<span class='badge'>Rows: " + rowsCompared + "</span>" +
+                "<span class='badge'>Cells: " + cellsCompared + "</span>" +
+                "<span class='badge'>Diffs: " + diffs + "</span>" +
+                "<span class='badge' style='background:#fff;border:1px solid #ddd;'>Equal</span>" +
+                "<span class='badge' style='background:#ffcccc;'>Different</span>" +
+                "</div>";
+    }
+
+    private static String renderTableHeader(List<String> fields, boolean showId) {
+        return renderTableHeader(fields, showId, DEFAULT_ID_FIELD);
+    }
+
+    private static String renderTableHeader(List<String> fields, boolean showId, String idFieldName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<thead><tr>");
+        if (showId) {
+            sb.append("<th>").append(escape(idFieldName)).append("</th>");
+        }
+        for (String fieldName : fields) {
+            sb.append("<th>").append(escape(fieldName)).append("</th>");
+        }
+        sb.append("</tr></thead>");
+        return sb.toString();
+    }
+
+    private static String renderTableBody(List<Row> rows, boolean showId) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<tbody>");
+        for (Row row : rows) {
+            sb.append("<tr>");
+            if (showId) {
+                sb.append("<td>").append(escape(row.id == null ? "" : row.id)).append("</td>");
+            }
+            for (Cell resultCell : row.cells) {
+                String cls = resultCell.equal ? "equal" : "diff";
+                sb.append("<td class='").append(cls).append("'>");
+                if (resultCell.equal) {
+                    sb.append(escape(orEmpty(resultCell.inputVal)));
+                } else {
+                    sb.append("<div><b>IN:</b> ").append(escape(orEmpty(resultCell.inputVal))).append("</div>");
+                    sb.append("<div><b>OUT:</b> ").append(escape(orEmpty(resultCell.outputVal))).append("</div>");
+                }
+                sb.append("</td>");
+            }
+            sb.append("</tr>");
+        }
+        sb.append("</tbody>");
+        return sb.toString();
+    }
+
+    private static String orEmpty(String rawInput) {
+        return rawInput == null ? "" : rawInput;
+    }
+
+    private static String escape(String rawInput) {
+        if (rawInput == null)
             return "";
-        return s.replace("&", "&amp;")
+        return rawInput.replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
     }
@@ -290,11 +332,11 @@ public class TableCompareExtension
         String methodName = testContext.getRequiredTestMethod().getName();
         String fileName = safeFileName(methodName) + ".html";
 
-        Path dir = Paths.get(REPORT_DIR, className);
-        Files.createDirectories(dir);
-        Path file = dir.resolve(fileName);
-        try (Writer w = new OutputStreamWriter(Files.newOutputStream(file), StandardCharsets.UTF_8)) {
-            w.write(html);
+        Path reportDirectory = Paths.get(REPORT_DIR, className);
+        Files.createDirectories(reportDirectory);
+        Path file = reportDirectory.resolve(fileName);
+        try (Writer htmlWriter = new OutputStreamWriter(Files.newOutputStream(file), StandardCharsets.UTF_8)) {
+            htmlWriter.write(html);
         }
 
         log.info("Test result file is here: {}", file.toAbsolutePath());
