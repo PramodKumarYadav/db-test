@@ -1,4 +1,4 @@
-package org.powertester.utils;
+package com.powertester.utils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

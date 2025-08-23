@@ -1,7 +1,5 @@
 package com.powertester.extensions;
 
-import static com.powertester.utils.DateUtils.getDateAsString;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +16,7 @@ import org.slf4j.MDC;
 public class TestRunExtension implements BeforeAllCallback, AfterAllCallback {
 
   private final AtomicBoolean runExecuted = new AtomicBoolean(false);
-  private static final Path TEST_REPORT_PATH = Paths.get(".", "test-reports", getDateAsString("yyyy-MM-dd/HH-mm"));
+  private static final Path TEST_REPORT_PATH = Paths.get(".", "test-reports");
   private long testRunStartTime;
 
   @Override
