@@ -86,6 +86,12 @@ class DBConnectionFailingTest {
 
     @Test
     void testCompareInputAndOutputTables() {
+        // Arrange: input (could be done at a test, class or at project level)
+
+        // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
+        // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
+
+        // Assert: Get input and output data to compare
         List<Map<String, String>> inputRows = db.executePreparedStatement("SELECT * FROM input");
         List<Map<String, String>> outputRows = db.executePreparedStatement("SELECT * FROM output");
 
@@ -94,7 +100,8 @@ class DBConnectionFailingTest {
     }
 
     @Test
-    void testCompareInputAndOutputTables2() {
+    void testAnotherCompareOfInputAndOutputTables() {
+        // Added a duplicate test of above, just to check that parallel execution works when there are more than one tests in a class.
         List<Map<String, String>> inputRows = db.executePreparedStatement("SELECT * FROM input");
         List<Map<String, String>> outputRows = db.executePreparedStatement("SELECT * FROM output");
 
