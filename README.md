@@ -1,10 +1,8 @@
 # db-test
 
-db-test is a lightweight framework that allows to do a functional database test compare of sql statement outputs, for ETL kind of use cases. 
+db-test is a lightweight framework that allows to do a functional test compare of sql statement outputs. The test results for each test are then presented in a html file that gives a csv style, row by row compare between source and target records.
 
-The test results for each test are then presented in a html file that gives a csv style, row by row compare between source and target records.
-
-## Problem statement
+## Why db-test?
 Comparing results of two SQL statements is easy using open source solutions such as JDBC. Asserting them with standard test libraries such as Junit5 or TestNg is also possible. However, if we use traditional test reports such as surefire or allure for these kind of tests, the output result from such assertions is hardly intutive or useful. 
 
 In context of sql output comparisons, a csv representation that highlights the differences for each row/cell feels intutive.
