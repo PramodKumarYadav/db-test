@@ -61,7 +61,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: "."
+          path: "./target/site/allure-maven-plugin"
 
       - name: Deploy to GitHub Pages
         if: always()
