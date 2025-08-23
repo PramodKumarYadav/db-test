@@ -84,13 +84,10 @@ public class TableCompareExtension
         Path reportPath = writeHtmlFile(context, html);
 
         // Fail the test if there are any differences
-        if (result.diffs > 0) {
-            File report = new File("test-reports/DBConnectionFailingTest/testCompareTwoSQLOutputsWithDefaultSettings.html");
-            try (FileInputStream fis = new FileInputStream(report)) {
-                Allure.addAttachment("Table Compare Report", "text/html", fis, ".html");
-            }
-            
+        if (result.diffs > 0) {  
             String reportLink = "file://" + reportPath.toAbsolutePath();
+            Allure.step("Table comparison failed: " + result.diffs + " differences found. " +
+            "<a href='" + reportLink + "' target='_blank'>Open Report</a>");
             throw new AssertionError(
                 "Table comparison failed: " + result.diffs + " differences found. "
                             + "See HTML report: " + reportLink);
