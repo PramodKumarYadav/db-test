@@ -24,10 +24,11 @@ jobs:
           cache-dependency-path: "pom.xml"
 
       - name: Run tests
-        run: |
-            mvn clean test --batch-mode
-            mvn -q allure:report
+        run: mvn clean test --batch-mode
 
+      - name: Generate Allure report
+        if: always()
+        run: mvn -q allure:report
 
       - name: Archive test reports
         if: always()
