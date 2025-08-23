@@ -36,5 +36,13 @@ mvn clean test
 
 ### Test Results
 
-Test results will be available in the `test-reports` directory as htmls. Each tests report will look like below.
+Test results will be available in the `test-reports` directory as htmls. Here are a few samples of how the reports can look like with different settings. 
+
+1. Report with default settings
 ![test-report](./images/test%20report.jpg)
+
+2. Report with a few fields skipped from comparison
+![test-report](./images/skip-fields-from-compare.png)
+
+3. Report with a Anchor field showed but skipped from comparison
+![test-report](./images/show-anchor-but-skip-from-compare.png)
