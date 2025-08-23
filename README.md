@@ -41,7 +41,21 @@ mvn clean test
 
 ### Test Results
 
-Test results will be available in the `test-reports` directory as htmls. Here are a few samples of how the reports can look like with different settings.
+To serve the full test report run:
+
+```sh
+mvn -q allure:serve
+```
+
+> [!IMPORTANT]  
+> From each test, you can go to detailed reports by clicking on the expand button as shown in below image. 
+
+![detailed-reports](./images/detailed-reports-from-allure.png)
+
+> [!TIP]
+> The detailed html test results are also accessible directly from the `test-reports` directory. 
+
+Here are a few samples of how the reports can look like with different settings.
 
 1. Report with default settings
    ![test-report](./images/test%20report.jpg)
