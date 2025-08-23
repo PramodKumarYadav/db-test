@@ -41,6 +41,7 @@ jobs:
         run: mvn clean test --batch-mode
 
       - name: Create Allure reports
+        if: always()
         run: mvn -q allure:report
 
       - name: Archive test reports
@@ -52,14 +53,17 @@ jobs:
           if-no-files-found: warn
 
       - name: Setup Pages
+        if: always()
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
+        if: always()
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
           path: "."
 
       - name: Deploy to GitHub Pages
+        if: always()
         id: deployment
         uses: actions/deploy-pages@v4
