@@ -200,75 +200,77 @@ public class TableCompareExtension
     }
 
     // --- HTML rendering & output ---
-    private static String renderHtml(ExtensionContext ctx, ComparisonResult r) {
-        String displayName = ctx.getDisplayName();
-        String testName = ctx.getRequiredTestMethod().getName();
-        String className = ctx.getRequiredTestClass().getSimpleName();
+    private static String renderHtml(ExtensionContext testContext, ComparisonResult comparisonResult) {
+        String displayName = testContext.getDisplayName();
+        String testName = testContext.getRequiredTestMethod().getName();
+        String className = testContext.getRequiredTestClass().getSimpleName();
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("<!doctype html><html><head><meta charset='utf-8'>");
-        sb.append("<title>Table Compare Report - ").append(escape(displayName)).append("</title>");
-        sb.append("<style>");
-        sb.append("body{font-family:Arial,Helvetica,sans-serif;margin:20px;}");
-        sb.append("h1{margin:0 0 10px 0;font-size:20px;}");
-        sb.append(".meta{color:#555;margin-bottom:16px;font-size:12px;}");
-        sb.append("table{border-collapse:collapse;width:100%;}");
-        sb.append("th,td{border:1px solid #ddd;padding:6px;text-align:left;}");
-        sb.append("th{background:#f5f5f5;position:sticky;top:0;}");
-        sb.append("td.equal{background:#ffffff;}");
-        sb.append("td.diff{background:#ffcccc;}");
-        sb.append(".legend{margin:10px 0 16px 0;font-size:12px;}");
-        sb.append(".badge{display:inline-block;padding:2px 8px;border-radius:10px;background:#eee;margin-right:6px;}");
-        sb.append("</style></head><body>");
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<!doctype html><html><head><meta charset='utf-8'>");
+        stringBuilder.append("<title>Table Compare Report - ").append(escape(displayName)).append("</title>");
+        stringBuilder.append("<style>");
+        stringBuilder.append("body{font-family:Arial,Helvetica,sans-serif;margin:20px;}");
+        stringBuilder.append("h1{margin:0 0 10px 0;font-size:20px;}");
+        stringBuilder.append(".meta{color:#555;margin-bottom:16px;font-size:12px;}");
+        stringBuilder.append("table{border-collapse:collapse;width:100%;}");
+        stringBuilder.append("th,td{border:1px solid #ddd;padding:6px;text-align:left;}");
+        stringBuilder.append("th{background:#f5f5f5;position:sticky;top:0;}");
+        stringBuilder.append("td.equal{background:#ffffff;}");
+        stringBuilder.append("td.diff{background:#ffcccc;}");
+        stringBuilder.append(".legend{margin:10px 0 16px 0;font-size:12px;}");
+        stringBuilder.append(".badge{display:inline-block;padding:2px 8px;border-radius:10px;background:#eee;margin-right:6px;}");
+        stringBuilder.append("</style></head><body>");
 
-        sb.append("<h1>Table Compare Report</h1>");
-        sb.append("<div class='meta'>");
-        sb.append("<div><b>Class:</b> ").append(escape(className)).append("</div>");
-        sb.append("<div><b>Test:</b> ").append(escape(testName)).append("</div>");
-        sb.append("<div><b>Display name:</b> ").append(escape(displayName)).append("</div>");
-        sb.append("<div><b>Generated:</b> ").append(escape(timestamp)).append("</div>");
-        sb.append("</div>");
+        stringBuilder.append("<h1>Table Compare Report</h1>");
+        stringBuilder.append("<div class='meta'>");
+        stringBuilder.append("<div><b>Class:</b> ").append(escape(className)).append("</div>");
+        stringBuilder.append("<div><b>Test:</b> ").append(escape(testName)).append("</div>");
+        stringBuilder.append("<div><b>Display name:</b> ").append(escape(displayName)).append("</div>");
+        stringBuilder.append("<div><b>Generated:</b> ").append(escape(timestamp)).append("</div>");
+        stringBuilder.append("</div>");
 
-        sb.append("<div class='legend'>");
-        sb.append("<span class='badge'>Rows: ").append(r.rowsCompared).append("</span>");
-        sb.append("<span class='badge'>Cells: ").append(r.cellsCompared).append("</span>");
-        sb.append("<span class='badge'>Diffs: ").append(r.diffs).append("</span>");
-        sb.append("<span class='badge' style='background:#fff;border:1px solid #ddd;'>Equal</span>");
-        sb.append("<span class='badge' style='background:#ffcccc;'>Different</span>");
-        sb.append("</div>");
+        stringBuilder.append("<div class='legend'>");
+        stringBuilder.append("<span class='badge'>Rows: ").append(comparisonResult.rowsCompared).append("</span>");
+        stringBuilder.append("<span class='badge'>Cells: ").append(comparisonResult.cellsCompared).append("</span>");
+        stringBuilder.append("<span class='badge'>Diffs: ").append(comparisonResult.diffs).append("</span>");
+        stringBuilder.append("<span class='badge' style='background:#fff;border:1px solid #ddd;'>Equal</span>");
+        stringBuilder.append("<span class='badge' style='background:#ffcccc;'>Different</span>");
+        stringBuilder.append("</div>");
 
-        sb.append("<table><thead><tr>");
+        stringBuilder.append("<table><thead><tr>");
         // Optional ID column if present
-        boolean showId = r.rows.stream().anyMatch(row -> row.id != null);
-        if (showId)
-            sb.append("<th>ID</th>");
-        for (String f : r.fields)
-            sb.append("<th>").append(escape(f)).append("</th>");
-        sb.append("</tr></thead><tbody>");
+        boolean showId = comparisonResult.rows.stream().anyMatch(row -> row.id != null);
 
-        for (Row row : r.rows) {
-            sb.append("<tr>");
+        if (showId)
+            stringBuilder.append("<th>ID</th>");
+
+        for (String fieldName : comparisonResult.fields)
+            stringBuilder.append("<th>").append(escape(fieldName)).append("</th>");
+        stringBuilder.append("</tr></thead><tbody>");
+
+        for (Row row : comparisonResult.rows) {
+            stringBuilder.append("<tr>");
             if (showId)
-                sb.append("<td>").append(escape(row.id == null ? "" : row.id)).append("</td>");
-            for (Cell c : row.cells) {
-                String cls = c.equal ? "equal" : "diff";
-                sb.append("<td class='").append(cls).append("'>");
+                stringBuilder.append("<td>").append(escape(row.id == null ? "" : row.id)).append("</td>");
+            for (Cell resultCell : row.cells) {
+                String cls = resultCell.equal ? "equal" : "diff";
+                stringBuilder.append("<td class='").append(cls).append("'>");
                 // Show input -> output if different, else show value once
-                if (c.equal) {
-                    sb.append(escape(orEmpty(c.inputVal)));
+                if (resultCell.equal) {
+                    stringBuilder.append(escape(orEmpty(resultCell.inputVal)));
                 } else {
-                    sb.append("<div><b>IN:</b> ").append(escape(orEmpty(c.inputVal))).append("</div>");
-                    sb.append("<div><b>OUT:</b> ").append(escape(orEmpty(c.outputVal))).append("</div>");
+                    stringBuilder.append("<div><b>IN:</b> ").append(escape(orEmpty(resultCell.inputVal))).append("</div>");
+                    stringBuilder.append("<div><b>OUT:</b> ").append(escape(orEmpty(resultCell.outputVal))).append("</div>");
                 }
-                sb.append("</td>");
+                stringBuilder.append("</td>");
             }
-            sb.append("</tr>");
+            stringBuilder.append("</tr>");
         }
 
-        sb.append("</tbody></table>");
-        sb.append("</body></html>");
-        return sb.toString();
+        stringBuilder.append("</tbody></table>");
+        stringBuilder.append("</body></html>");
+        return stringBuilder.toString();
     }
 
     private static String orEmpty(String s) {
@@ -295,7 +297,7 @@ public class TableCompareExtension
             w.write(html);
         }
 
-        log.info("[TableCompareExtension] Wrote: {}", file.toAbsolutePath());
+        log.info("Test result file is here: {}", file.toAbsolutePath());
     }
 
     private static String safeFileName(String rawFileName) {
