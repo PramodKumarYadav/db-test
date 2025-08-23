@@ -79,13 +79,15 @@ public class TableCompareExtension
         // Render HTML
         String html = renderHtml(context, result);
 
-        // Write file
-        writeHtmlFile(context, html);
+        // Write file and get path
+        Path reportPath = writeHtmlFile(context, html);
 
         // Fail the test if there are any differences
         if (result.diffs > 0) {
+            String reportLink = "file://" + reportPath.toAbsolutePath();
             throw new AssertionError(
-                    "Table comparison failed: " + result.diffs + " differences found. See HTML report for details.");
+                "Table comparison failed: " + result.diffs + " differences found. "
+                + "See HTML report: " + reportLink);
         }
 
         // Cleanup
@@ -273,10 +275,6 @@ public class TableCompareExtension
                 "</div>";
     }
 
-    private static String renderTableHeader(List<String> fields, boolean showId) {
-        return renderTableHeader(fields, showId, DEFAULT_ID_FIELD);
-    }
-
     private static String renderTableHeader(List<String> fields, boolean showId, String idFieldName) {
         StringBuilder sb = new StringBuilder();
         sb.append("<thead><tr>");
@@ -327,7 +325,7 @@ public class TableCompareExtension
                 .replace(">", "&gt;");
     }
 
-    private static void writeHtmlFile(ExtensionContext testContext, String html) throws IOException {
+    private static Path writeHtmlFile(ExtensionContext testContext, String html) throws IOException {
         String className = testContext.getRequiredTestClass().getSimpleName();
         String methodName = testContext.getRequiredTestMethod().getName();
         String fileName = safeFileName(methodName) + ".html";
@@ -340,6 +338,7 @@ public class TableCompareExtension
         }
 
         log.info("Test result file is here: {}", file.toAbsolutePath());
+        return file;
     }
 
     private static String safeFileName(String rawFileName) {
