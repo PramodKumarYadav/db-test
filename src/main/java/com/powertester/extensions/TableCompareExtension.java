@@ -2,6 +2,7 @@ package com.powertester.extensions;
 
 import org.junit.jupiter.api.extension.*;
 
+import io.qameta.allure.Allure;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -84,10 +85,15 @@ public class TableCompareExtension
 
         // Fail the test if there are any differences
         if (result.diffs > 0) {
+            File report = new File("test-reports/DBConnectionFailingTest/testCompareTwoSQLOutputsWithDefaultSettings.html");
+            try (FileInputStream fis = new FileInputStream(report)) {
+                Allure.addAttachment("Table Compare Report", "text/html", fis, ".html");
+            }
+            
             String reportLink = "file://" + reportPath.toAbsolutePath();
             throw new AssertionError(
                 "Table comparison failed: " + result.diffs + " differences found. "
-                + "See HTML report: " + reportLink);
+                            + "See HTML report: " + reportLink);
         }
 
         // Cleanup
