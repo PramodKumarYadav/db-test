@@ -26,6 +26,9 @@ jobs:
       - name: Run tests
         run: mvn clean test --batch-mode
 
+      - name: Generate Allure report
+        run: mvn -q allure:report
+
       - name: Archive test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -33,3 +36,11 @@ jobs:
           name: test-reports
           path: test-reports/
           if-no-files-found: warn
+      
+      - name: Archive Allure reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: allure-report
+            path: target/site/
+            if-no-files-found: warn

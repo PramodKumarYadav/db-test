@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.powertester</groupId>
@@ -7,16 +8,35 @@
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-    <junit.version>5.13.4</junit.version>
-    <h2.version>2.3.232</h2.version>
     <maven.surefire.version>3.5.3</maven.surefire.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Versions (pick stable lines) -->
+    <!-- NOTE: Allure is locked in to junit 5.11.X version. If we bump up version, we need to check compatibility with Allure -->
+    <junit.version>5.11.4</junit.version>
+    <allure.version>2.29.1</allure.version>
+    <aspectj.version>1.9.22.1</aspectj.version>
+
+    <h2.version>2.3.232</h2.version>
     <lombok.version>1.18.38</lombok.version>
     <typesafe.version>1.4.3</typesafe.version>
     <slf4j.version>2.0.17</slf4j.version>
     <logback-classic.version>1.5.18</logback-classic.version>
     <HikariCP.version>7.0.2</HikariCP.version>
   </properties>
+
+  <!-- Let Allure BOM manage Allure component versions -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.qameta.allure</groupId>
+        <artifactId>allure-bom</artifactId>
+        <version>${allure.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- JUnit 5 -->
@@ -26,7 +46,20 @@
       <version>${junit.version}</version>
     </dependency>
 
-    <!-- H2 only for demo tests -->
+    <!-- Allure JUnit5 adapter (version comes from BOM) -->
+    <dependency>
+      <groupId>io.qameta.allure</groupId>
+      <artifactId>allure-junit5</artifactId>
+    </dependency>
+
+    <!-- AspectJ (only needed if we want @Step/@Attachment weaving) -->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>${aspectj.version}</version>
+    </dependency>
+
+    <!-- Your libs -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
@@ -67,9 +100,35 @@
             <version>${HikariCP.version}</version>
         </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
+
+      <!-- Copy aspectjweaver.jar to target so argLine is stable everywhere -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.6.1</version>
+        <executions>
+          <execution>
+            <id>copy-aspectjweaver</id>
+            <phase>process-test-classes</phase>
+            <goals><goal>copy</goal></goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.aspectj</groupId>
+                  <artifactId>aspectjweaver</artifactId>
+                  <version>${aspectj.version}</version>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -79,7 +138,17 @@
           <includes>
             <include>**/*Test.java</include>
           </includes>
+
+          <!-- Only needed if you use @Step/@Attachment without manual calls -->
+          <argLine>-javaagent:${project.build.directory}/aspectjweaver-${aspectj.version}.jar</argLine>
         </configuration>
+      </plugin>
+
+      <!-- Allure report generation -->
+      <plugin>
+        <groupId>io.qameta.allure</groupId>
+        <artifactId>allure-maven</artifactId>
+        <version>2.12.0</version>
       </plugin>
     </plugins>
   </build>

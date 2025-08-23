@@ -4,3 +4,5 @@
 # test reports
 /test-reports/
 
+# Ignore allure files
+/.allure/
