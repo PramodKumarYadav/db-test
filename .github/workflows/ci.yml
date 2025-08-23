@@ -7,10 +7,24 @@ on:
     branches: [main]
   workflow_dispatch:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,6 +40,9 @@ jobs:
       - name: Run tests
         run: mvn clean test --batch-mode
 
+      - name: Create Allure reports
+        run: mvn -q allure:report
+
       - name: Archive test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -33,26 +50,16 @@ jobs:
           name: test-reports
           path: test-reports/
           if-no-files-found: warn
-          
-      - name: Setup Allure History
-        uses: actions/checkout@v4.2.2
-        if: always()
-        continue-on-error: true
-        with:
-          ref: gh-pages
-          path: gh-pages
 
-      - name: Generate Allure Report
-        uses: simple-elf/allure-report-action@v1.11
-        if: always()
-        with:
-          allure_results: target/allure-results
-          allure_history: allure-history
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-      - name: Publish Allure Report
-        if: always()
-        uses: peaceiris/actions-gh-pages@v4.0.0
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
+          # Upload entire repository
+          path: "."
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
