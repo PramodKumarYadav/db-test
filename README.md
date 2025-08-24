@@ -48,7 +48,7 @@ mvn -q allure:serve
 ```
 
 > [!IMPORTANT]  
-> From each test, you can go to detailed reports by clicking on the expand button as shown in below image. 
+> From each test, you can go to detailed reports by clicking on the icons as shown in below image. 
 
 ![detailed-reports](./images/detailed-reports-from-allure.png)
 
