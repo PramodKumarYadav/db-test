@@ -2,16 +2,41 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run test and open Allure report",
+      "label": "Run tests (Maven)",
       "type": "shell",
-      "command": "chmod +x run-tests.sh && ./run-tests.sh",
-      "presentation": {
-        "reveal": "always"
-      },
-      "problemMatcher": [],
+      "command": "mvn",
+      "args": ["-q", "-Dmaven.test.failure.ignore=true", "clean", "test"],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Allure report (Maven)",
+      "type": "shell",
+      "command": "mvn",
+      "args": ["-q", "allure:report"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Open Allure report (Maven)",
+      "type": "shell",
+      "command": "mvn",
+      "args": ["-q", "allure:serve"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Run test and open Allure report",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Run tests (Maven)",
+        "Generate Allure report (Maven)",
+        "Open Allure report (Maven)"
+      ],
       "group": {
         "kind": "test",
         "isDefault": true
+      },
+      "runOptions": {
+        "reevaluateOnRerun": true
       }
     }
   ]
