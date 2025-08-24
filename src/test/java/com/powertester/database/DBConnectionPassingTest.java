@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +58,10 @@ class DBConnectionPassingTest {
         List<Map<String, String>> empRows = db.executePreparedStatement("SELECT * FROM emp");
         List<Map<String, String>> customerRows = db.executePreparedStatement("SELECT * FROM customer");
 
-        // Hand the rows to the extension so it can generate the HTML after the test finishes
+        // Completeness check: Assert that both input and output are of same size.
+        assertEquals(empRows.size(), customerRows.size());
+
+        // Correctness check: Assert that both input and output has same data.
         TableCompareExtension.captureRows(empRows, customerRows);
     }
 

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,10 @@ class DBConnectionFailingTest {
         List<Map<String, String>> inputRows = db.executePreparedStatement("SELECT * FROM input");
         List<Map<String, String>> outputRows = db.executePreparedStatement("SELECT * FROM output");
 
-        // Hand the rows to the extension so it can generate the HTML after the test finishes
+        // Completeness check: Assert that both input and output are of same size.
+        assertEquals(inputRows.size(), outputRows.size());
+
+        // Correctness check: Assert that both input and output has same data.
         TableCompareExtension.captureRows(inputRows, outputRows);
     }
 
@@ -111,8 +115,10 @@ class DBConnectionFailingTest {
         List<Map<String, String>> inputRows = db.executePreparedStatement("SELECT * FROM input");
         List<Map<String, String>> outputRows = db.executePreparedStatement("SELECT * FROM output");
 
-        // Hand the rows to the extension so it can generate the HTML after the test finishes
-        // Ignore age and gender from comparison
+        // Completeness check: Assert that both input and output are of same size.
+        assertEquals(inputRows.size(), outputRows.size());
+
+        // Correctness check: Assert that both input and output has same data.
         TableCompareExtension.captureRows(inputRows, outputRows, Set.of("AGE", "GENDER"));
     }
 
@@ -127,7 +133,10 @@ class DBConnectionFailingTest {
         List<Map<String, String>> inputRows = db.executePreparedStatement("SELECT * FROM input");
         List<Map<String, String>> outputRows = db.executePreparedStatement("SELECT * FROM output");
 
-        // Hand the rows to the extension so it can generate the HTML after the test finishes
+        // Completeness check: Assert that both input and output are of same size.
+        assertEquals(inputRows.size(), outputRows.size());
+
+        // Correctness check: Assert that both input and output has same data.
         TableCompareExtension.captureRows(inputRows, outputRows, null, "EMP_ID");
     }
 
