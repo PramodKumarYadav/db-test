@@ -2,14 +2,17 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Test and Report",
+      "label": "Run test and open Allure report",
       "type": "shell",
       "command": "chmod +x run-tests.sh && ./run-tests.sh",
-      "group": "test",
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
     }
   ]
 }

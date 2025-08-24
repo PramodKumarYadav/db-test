@@ -48,12 +48,12 @@ mvn -q allure:serve
 ```
 
 > [!IMPORTANT]  
-> From each test, you can go to detailed reports by clicking on the icons as shown in below image. 
+> From each test, you can go to detailed reports by clicking on the icons as shown in below image.
 
 ![detailed-reports](./images/detailed-reports-from-allure.png)
 
 > [!TIP]
-> The detailed html test results are also accessible directly from the `test-reports` directory. 
+> The detailed html test results are also accessible directly from the `test-reports` directory.
 
 Here are a few samples of how the reports can look like with different settings.
 

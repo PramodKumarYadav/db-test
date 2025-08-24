@@ -1,0 +1,8 @@
+[
+  {
+    "key": "ctrl+shift+t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Run test and open Allure report",
+    "when": "true"
+  }
+]
