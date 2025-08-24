@@ -5,10 +5,17 @@ on:
     branches: [main]
     paths-ignore:
       - "README.md"
+      - "images/**"
+      - ".gitignore"
+      - ".vscode/**"
   pull_request:
     branches: [main]
     paths-ignore:
       - "README.md"
+      - "images/**"
+      - ".gitignore"
+      - ".vscode/**"
+
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
