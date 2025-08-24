@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run tests and open Allure report on failure",
+      "type": "shell",
+      "command": "chmod +x run-tests.sh && ./run-tests.sh",
+      "group": "test",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
