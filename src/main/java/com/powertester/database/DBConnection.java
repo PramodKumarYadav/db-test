@@ -163,6 +163,7 @@ public class DBConnection {
 
   // Close connection pool
   public void closeConnectionPool() {
+    log.info("Closing Hikari datasource pool");
     dataSource.close();
   }
 }
