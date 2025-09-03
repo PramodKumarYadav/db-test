@@ -45,22 +45,10 @@ public class TestRunExtension implements BeforeAllCallback, ExtensionContext.Sto
     }
   }
 
-  // @Override
-  // public void afterAll(final ExtensionContext extensionContext) {
-  //   if (runExecuted.get()) {
-  //     MDC.put("testContext", "TestRun Completed");
-  //     // DBConnection.getInstance().closeConnectionPool();
-
-  //     log.info(
-  //         "Test run completed in {} seconds.",
-  //         (System.currentTimeMillis() - testRunStartTime) / 1000.0);
-  //     MDC.clear();
-  //   }
-  // }
-
   @Override
   public void close() {
     MDC.put("testContext", "TestRun Completed");
+    log.info("Closing Hikari datasource pool (only once) at the end of the whole test run");
     DBConnection.getInstance().closeConnectionPool();
 
     log.info(
