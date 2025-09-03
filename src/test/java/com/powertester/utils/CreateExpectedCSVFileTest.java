@@ -58,6 +58,5 @@ class CreateExpectedCSVFileTest {
     @AfterAll
     static void tearDownAll() {
         db.executeUpdate("DROP TABLE student");
-        db.closeConnectionPool();
     }
 }

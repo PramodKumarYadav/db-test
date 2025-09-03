@@ -144,6 +144,5 @@ class DBConnectionFailingTest {
     static void tearDownAll() {
         db.executeUpdate("DROP TABLE source");
         db.executeUpdate("DROP TABLE target");
-        db.closeConnectionPool();
     }
 }

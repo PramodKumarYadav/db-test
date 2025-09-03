@@ -89,6 +89,5 @@ class DBConnectionPassingTest {
     static void tearDownAll() {
         db.executeUpdate("DROP TABLE emp");
         db.executeUpdate("DROP TABLE customer");
-        db.closeConnectionPool();
     }
 }
