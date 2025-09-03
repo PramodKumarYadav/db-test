@@ -7,13 +7,12 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import com.powertester.database.DBConnection;
 import org.slf4j.MDC;
 
 @Slf4j
-public class TestRunExtension implements BeforeAllCallback, AfterAllCallback {
+public class TestRunExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource  {
 
   private final AtomicBoolean runExecuted = new AtomicBoolean(false);
   private static final Path TEST_REPORT_PATH = Paths.get(".", "test-reports");
@@ -46,16 +45,27 @@ public class TestRunExtension implements BeforeAllCallback, AfterAllCallback {
     }
   }
 
-  @Override
-  public void afterAll(final ExtensionContext extensionContext) {
-    if (runExecuted.get()) {
-      MDC.put("testContext", "TestRun Completed");
-      // DBConnection.getInstance().closeConnectionPool();
+  // @Override
+  // public void afterAll(final ExtensionContext extensionContext) {
+  //   if (runExecuted.get()) {
+  //     MDC.put("testContext", "TestRun Completed");
+  //     // DBConnection.getInstance().closeConnectionPool();
 
-      log.info(
-          "Test run completed in {} seconds.",
-          (System.currentTimeMillis() - testRunStartTime) / 1000.0);
-      MDC.clear();
-    }
+  //     log.info(
+  //         "Test run completed in {} seconds.",
+  //         (System.currentTimeMillis() - testRunStartTime) / 1000.0);
+  //     MDC.clear();
+  //   }
+  // }
+
+  @Override
+  public void close() {
+    MDC.put("testContext", "TestRun Completed");
+    DBConnection.getInstance().closeConnectionPool();
+
+    log.info(
+        "Test run completed in {} seconds.",
+        (System.currentTimeMillis() - testRunStartTime) / 1000.0);
+    MDC.clear();
   }
 }
