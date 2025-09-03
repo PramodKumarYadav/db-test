@@ -13,6 +13,9 @@ import java.util.*;
 
 public class CsvUtils {
 
+    // Private constructor to prevent instantiation
+    private CsvUtils() {}
+
     // Read CSV into List<Map<String, String>>
     public static List<Map<String, String>> readCsvToMapList(String filePath) throws IOException {
         List<Map<String, String>> rows = new ArrayList<>();
