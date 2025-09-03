@@ -23,6 +23,7 @@
     <slf4j.version>2.0.17</slf4j.version>
     <logback-classic.version>1.5.18</logback-classic.version>
     <HikariCP.version>7.0.2</HikariCP.version>
+    <commons-csv.version>1.14.1</commons-csv.version>
   </properties>
 
   <!-- Let Allure BOM manage Allure component versions -->
@@ -98,6 +99,12 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>${HikariCP.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${commons-csv.version}</version>
         </dependency>
   </dependencies>
 

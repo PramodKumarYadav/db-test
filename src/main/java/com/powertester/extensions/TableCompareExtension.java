@@ -28,21 +28,21 @@ public class TableCompareExtension
     // Optional: fields to ignore (you can change/add via setter if you like)
     private static final Set<String> DEFAULT_IGNORED_FIELDS = new HashSet<>(Collections.singletonList(DEFAULT_ID_FIELD));
 
-    public static void captureRows(List<Map<String, String>> inputRows,
-            List<Map<String, String>> outputRows) {
-        TL_CAPTURED.set(new Captured(inputRows, outputRows, DEFAULT_IGNORED_FIELDS, DEFAULT_ID_FIELD));
+    public static void captureRows(List<Map<String, String>> expectedRows,
+            List<Map<String, String>> actualRows) {
+        TL_CAPTURED.set(new Captured(expectedRows, actualRows, DEFAULT_IGNORED_FIELDS, DEFAULT_ID_FIELD));
     }
 
     /** Overload if you want custom ignored fields per test */
-    public static void captureRows(List<Map<String, String>> inputRows,
-            List<Map<String, String>> outputRows,
+    public static void captureRows(List<Map<String, String>> expectedRows,
+            List<Map<String, String>> actualRows,
             Set<String> ignoredFields) {
-        TL_CAPTURED.set(new Captured(inputRows, outputRows,
+        TL_CAPTURED.set(new Captured(expectedRows, actualRows,
                 ignoredFields == null ? DEFAULT_IGNORED_FIELDS : ignoredFields, DEFAULT_ID_FIELD));
     }
 
-    public static void captureRows(List<Map<String, String>> inputRows,
-            List<Map<String, String>> outputRows,
+    public static void captureRows(List<Map<String, String>> expectedRows,
+            List<Map<String, String>> actualRows,
             Set<String> ignoredFields, String idField) {
 
         // ID should be upper case for it to be ignored.
@@ -57,7 +57,7 @@ public class TableCompareExtension
         }
         effectiveIgnoredFields.add(effectiveIdField);
 
-        TL_CAPTURED.set(new Captured(inputRows, outputRows, effectiveIgnoredFields, effectiveIdField));
+        TL_CAPTURED.set(new Captured(expectedRows, actualRows, effectiveIgnoredFields, effectiveIdField));
     }
     
     @Override
@@ -75,7 +75,7 @@ public class TableCompareExtension
         }
 
         // Build comparison model
-        ComparisonResult result = compare(captured.inputRows, captured.outputRows, captured.ignoredFields, captured.idField);
+        ComparisonResult result = compare(captured.expectedRows, captured.actualRows, captured.ignoredFields, captured.idField);
 
         // Render HTML
         String html = renderHtml(context, result);
@@ -111,14 +111,14 @@ public class TableCompareExtension
     // --- Data classes ---
 
     private static class Captured {
-        final List<Map<String, String>> inputRows;
-        final List<Map<String, String>> outputRows;
+        final List<Map<String, String>> expectedRows;
+        final List<Map<String, String>> actualRows;
         final Set<String> ignoredFields;
         final String idField;
 
         Captured(List<Map<String, String>> in, List<Map<String, String>> out, Set<String> ignored, String id) {
-            this.inputRows = in == null ? List.of() : in;
-            this.outputRows = out == null ? List.of() : out;
+            this.expectedRows = in == null ? List.of() : in;
+            this.actualRows = out == null ? List.of() : out;
             this.ignoredFields = ignored == null ? Set.of() : ignored;
             this.idField = id;
         }
@@ -164,27 +164,27 @@ public class TableCompareExtension
 
     // --- Comparison logic ---
 
-    private static ComparisonResult compare(List<Map<String, String>> inputRows,
-            List<Map<String, String>> outputRows,
+    private static ComparisonResult compare(List<Map<String, String>> expectedRows,
+            List<Map<String, String>> actualRows,
             Set<String> ignoredFields, String idField) {
 
         // Compare up to the smaller of the two lists to allow for
         // comparison if there are differences in row sizes in input and output.
         // (in the end, also assert that both sizes are equal so that we test for completeness)
-        int rowsCompared = Math.min(inputRows.size(), outputRows.size());
+        int rowsCompared = Math.min(expectedRows.size(), actualRows.size());
 
         // Determine field order from union of keys in first input row (fallback to
         // output if needed)
         Set<String> union = new LinkedHashSet<>();
-        if (!inputRows.isEmpty())
-            union.addAll(inputRows.get(0).keySet());
-        else if (!outputRows.isEmpty())
-            union.addAll(outputRows.get(0).keySet());
+        if (!expectedRows.isEmpty())
+            union.addAll(expectedRows.get(0).keySet());
+        else if (!actualRows.isEmpty())
+            union.addAll(actualRows.get(0).keySet());
 
         // plus any extra keys found (it could highlight keys that are missed from comparisons)
         for (int i = 0; i < rowsCompared; i++) {
-            union.addAll(inputRows.get(i).keySet());
-            union.addAll(outputRows.get(i).keySet());
+            union.addAll(expectedRows.get(i).keySet());
+            union.addAll(actualRows.get(i).keySet());
         }
 
         // remove ignored fields, but keep a separate ID (if present) for display
@@ -199,8 +199,8 @@ public class TableCompareExtension
         List<Row> rows = new ArrayList<>();
 
         for (int i = 0; i < rowsCompared; i++) {
-            Map<String, String> currentInputRow = inputRows.get(i);
-            Map<String, String> currentOutputRow = outputRows.get(i);
+            Map<String, String> currentInputRow = expectedRows.get(i);
+            Map<String, String> currentOutputRow = actualRows.get(i);
 
             String id = hasId ? Objects.toString(currentInputRow.getOrDefault(idField, currentOutputRow.get(idField)), "") : null;
 

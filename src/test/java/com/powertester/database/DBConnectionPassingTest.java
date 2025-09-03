@@ -13,6 +13,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 import com.powertester.extensions.TableCompareExtension;
+import com.powertester.utils.CsvUtils;
 
 @Slf4j
 @ExtendWith(TableCompareExtension.class)
@@ -49,21 +50,40 @@ class DBConnectionPassingTest {
 
     @Test
     void testCompareEmpAndCustomerTables() {
+            // Arrange: input (could be done at a test, class or at project level)
+
+            // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
+            // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
+
+            // Assert: Get input and output data to compare
+            List<Map<String, String>> empRows = db.executePreparedStatement("SELECT * FROM emp");
+            List<Map<String, String>> customerRows = db.executePreparedStatement("SELECT * FROM customer");
+
+            // Completeness check: Assert that both input and output are of same size.
+            assertEquals(empRows.size(), customerRows.size());
+
+            // Correctness check: Assert that both input and output has same data.
+            TableCompareExtension.captureRows(empRows, customerRows);
+    }
+    
+    @Test
+    void testUsingExpectedCustomerCSVAndActualSQLOutput() throws java.io.IOException {
         // Arrange: input (could be done at a test, class or at project level)
 
         // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
         // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
         // Assert: Get input and output data to compare
-        List<Map<String, String>> empRows = db.executePreparedStatement("SELECT * FROM emp");
-        List<Map<String, String>> customerRows = db.executePreparedStatement("SELECT * FROM customer");
+        List<Map<String, String>> expectedCustomers = CsvUtils.readCsvToMapList("src/test/resources/testdata/expected_customer_data.csv");
+        List<Map<String, String>> actualCustomers = db.executePreparedStatement("SELECT * FROM customer");
 
         // Completeness check: Assert that both input and output are of same size.
-        assertEquals(empRows.size(), customerRows.size());
+        assertEquals(expectedCustomers.size(), actualCustomers.size());
 
         // Correctness check: Assert that both input and output has same data.
-        TableCompareExtension.captureRows(empRows, customerRows);
+        TableCompareExtension.captureRows(expectedCustomers, actualCustomers);
     }
+
 
     @AfterAll
     static void tearDownAll() {
