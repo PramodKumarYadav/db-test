@@ -50,7 +50,7 @@ public class TestRunExtension implements BeforeAllCallback, AfterAllCallback {
   public void afterAll(final ExtensionContext extensionContext) {
     if (runExecuted.get()) {
       MDC.put("testContext", "TestRun Completed");
-      DBConnection.getInstance().closeConnectionPool();
+      // DBConnection.getInstance().closeConnectionPool();
 
       log.info(
           "Test run completed in {} seconds.",
