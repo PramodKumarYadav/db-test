@@ -3,7 +3,6 @@ package com.powertester.database;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import com.powertester.extensions.TableCompareExtension;
 
 @Slf4j
-@ExtendWith(TableCompareExtension.class)
 class DBConnectionFailingTest {
     private static final DBConnection db = DBConnection.getInstance();
 

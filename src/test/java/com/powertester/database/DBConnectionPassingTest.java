@@ -3,7 +3,6 @@ package com.powertester.database;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -16,7 +15,6 @@ import com.powertester.extensions.TableCompareExtension;
 import com.powertester.utils.CsvUtils;
 
 @Slf4j
-@ExtendWith(TableCompareExtension.class)
 class DBConnectionPassingTest {
     private static final DBConnection db = DBConnection.getInstance();
 
@@ -74,7 +72,7 @@ class DBConnectionPassingTest {
         // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
         // Assert: Get input and output data to compare
-        String expectedCSVFilePath = "src/test/resources/data/tc01-new-customers/expected.csv";
+        String expectedCSVFilePath = "src/test/resources/data/tc03-inactive-customers/expected.csv";
         List<Map<String, String>> expectedCustomers = CsvUtils.readCsvToMapList(expectedCSVFilePath);
         List<Map<String, String>> actualCustomers = db.executePreparedStatement("SELECT * FROM customer");
 
