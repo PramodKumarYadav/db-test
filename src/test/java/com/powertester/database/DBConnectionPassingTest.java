@@ -74,7 +74,8 @@ class DBConnectionPassingTest {
         // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
         // Assert: Get input and output data to compare
-        List<Map<String, String>> expectedCustomers = CsvUtils.readCsvToMapList("src/test/resources/data/tc01-new-customers/expected.csv");
+        String expectedCSVFilePath = "src/test/resources/data/tc01-new-customers/expected.csv";
+        List<Map<String, String>> expectedCustomers = CsvUtils.readCsvToMapList(expectedCSVFilePath);
         List<Map<String, String>> actualCustomers = db.executePreparedStatement("SELECT * FROM customer");
 
         // Completeness check: Assert that both input and output are of same size.
