@@ -13,7 +13,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -124,7 +124,7 @@ public class DBConnection {
     ResultSetMetaData metaData = resultSet.getMetaData();
     int columnCount = metaData.getColumnCount();
     while (resultSet.next()) {
-      Map<String, String> row = new HashMap<>();
+      Map<String, String> row = new LinkedHashMap<>();
       for (int i = 1; i <= columnCount; i++) {
         row.put(metaData.getColumnName(i), resultSet.getString(i));
       }
@@ -148,7 +148,7 @@ public class DBConnection {
       statement.execute();
 
       // Get output parameters
-      Map<String, String> resultMap = new HashMap<>();
+      Map<String, String> resultMap = new LinkedHashMap<>();
       for (String outputParameter : outputParameters) {
         resultMap.put(outputParameter, statement.getString(outputParameter));
       }
