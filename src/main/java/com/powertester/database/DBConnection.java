@@ -81,6 +81,13 @@ public class DBConnection {
     return connection;
   }
 
+  // Execute multiple update queries
+  public void update(List<String> sqlStatements) {
+    for (String sql : sqlStatements) {
+      update(sql);
+    }
+  }
+  
   // Execute update query
   public void update(String sql) {
     try (Connection connection = getConnection();
@@ -90,6 +97,8 @@ public class DBConnection {
       throw new IllegalStateException("Error executing update query" + sql, e);
     }
   }
+
+  
 
   // Preferred option 1: Execute a prepared statement and return the resultSet data as a list of map
   // of column name and value

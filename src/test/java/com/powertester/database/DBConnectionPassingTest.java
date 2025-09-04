@@ -24,9 +24,7 @@ class DBConnectionPassingTest {
         // Read and execute each SQL statement from input.sql
         String sqlFilePath = "src/test/resources/data/tc03-inactive-customers/input.sql";
         List<String> statements = SqlUtils.readSqlStatements(sqlFilePath);
-        for (String stmt : statements) {
-                db.update(stmt);
-        }
+        db.update(statements);
     }
 
     @Test
