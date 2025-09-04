@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import com.powertester.config.TestConfig;
+import com.powertester.utils.SqlFileReader;
 
 @Slf4j
 public class DBConnection {
@@ -108,6 +109,12 @@ public class DBConnection {
     } catch (Exception e) {
       throw new IllegalStateException("Error executing prepared statement" + sql, e);
     }
+  }
+
+  // Create another method for executePreparedStatement which accepts file paths that contains SQLs to execute
+  public List<Map<String, String>> executePreparedStatementFromFile(String filePath) {
+    String sql = SqlFileReader.readSqlFromFile(filePath);
+    return executePreparedStatement(sql);
   }
 
   private static List<Map<String, String>> getResultListFromResultSet(ResultSet resultSet)

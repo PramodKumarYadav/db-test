@@ -240,7 +240,7 @@ public class TableCompareExtension
 
         boolean showId = comparisonResult.rows.stream().anyMatch(row -> row.id != null);
         String idFieldName = testContext instanceof ExtensionContext ?
-            ((Captured)TL_CAPTURED.get()).idField : DEFAULT_ID_FIELD;
+            (TL_CAPTURED.get()).idField : DEFAULT_ID_FIELD;
 
         stringBuilder.append("<table>");
         stringBuilder.append(renderTableHeader(comparisonResult.fields, showId, idFieldName));

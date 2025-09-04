@@ -45,16 +45,35 @@ class CreateExpectedCSVFileTest {
         List<Map<String, String>> actualRows = db.executePreparedStatement("SELECT * FROM student");
 
         // Generate expected csv file.
-        CsvUtils.writeMapListToCsv("src/test/resources/testdata/expected_student_data.csv", actualRows);
+        String expectedCSVFilePath = "src/test/resources/data/tc02-premium-customers/expected.csv";
+        CsvUtils.writeMapListToCsv(expectedCSVFilePath, actualRows);
 
-        // Verify the generated CSV file
-        List<Map<String, String>> expectedRows = CsvUtils.readCsvToMapList("src/test/resources/testdata/expected_student_data.csv");
+        // Get the generated CSV file
+        List<Map<String, String>> expectedRows = CsvUtils.readCsvToMapList(expectedCSVFilePath);
         TableCompareExtension.captureRows(expectedRows, actualRows);
 
         // Completeness check: Assert that both input and output are of same size.
         assertEquals(expectedRows.size(), actualRows.size());
     }
 
+    @Test
+    void generateExpectedCSVFileFromActualSQLOutputFile() throws java.io.IOException {
+        // Arrange: Create expected results CSV based on actual SQL output. Later adjust the values as per requirements.
+        String outputSQLFilePath = "src/test/resources/data/tc01-new-customers/output.sql";
+        List<Map<String, String>> actualRows = db.executePreparedStatementFromFile(outputSQLFilePath);
+
+        // Generate expected csv file.
+        String expectedCSVFilePath = "src/test/resources/data/tc01-new-customers/expected.csv";
+        CsvUtils.writeMapListToCsv(expectedCSVFilePath, actualRows);
+
+        // Get the generated CSV file
+        List<Map<String, String>> expectedRows = CsvUtils.readCsvToMapList(expectedCSVFilePath);
+        TableCompareExtension.captureRows(expectedRows, actualRows);
+
+        // Completeness check: Assert that both input and output are of same size.
+        assertEquals(expectedRows.size(), actualRows.size());
+    }
+    
     @AfterAll
     static void tearDownAll() {
         db.executeUpdate("DROP TABLE student");
