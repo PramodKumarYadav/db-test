@@ -21,14 +21,14 @@ class DBConnectionFailingTest {
     @BeforeAll
     static void createTables() {
         // Create tables with more fields
-        db.executeUpdate(
+        db.update(
                 "CREATE TABLE source (emp_id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
-        db.executeUpdate(
+        db.update(
                 "CREATE TABLE target (emp_id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
 
         // Clean tables before each test to avoid PK violation in repeated tests
-        db.executeUpdate("DELETE FROM source");
-        db.executeUpdate("DELETE FROM target");
+        db.update("DELETE FROM source");
+        db.update("DELETE FROM target");
         String[] firstNames = { "John", "Jane", "Alex", "Emily", "Chris", "Pat", "Sam", "Taylor", "Jordan", "Morgan",
                 "Casey", "Jamie", "Robin", "Drew", "Blake", "Cameron", "Avery", "Riley", "Quinn", "Skyler" };
         String[] lastNames = { "Doe", "Smith", "Brown", "Johnson", "Lee", "Clark", "Lewis", "Walker", "Young", "King",
@@ -74,10 +74,10 @@ class DBConnectionFailingTest {
                 }
             }
 
-            db.executeUpdate(String.format(
+            db.update(String.format(
                     "INSERT INTO source (emp_id, first_name, last_name, age, gender) VALUES (%d, '%s', '%s', %d, '%s')", i,
                     randomFirstName, randomLastName, age, gender));
-            db.executeUpdate(String.format(
+            db.update(String.format(
                     "INSERT INTO target (emp_id, first_name, last_name, age, gender) VALUES (%d, '%s', '%s', %d, '%s')", i,
                     targetFirstName, targetLastName, targetAge, targetGender));
         }
@@ -92,8 +92,8 @@ class DBConnectionFailingTest {
         // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
         // Assert: Get source and target data to compare
-        List<Map<String, String>> sourceRows = db.executePreparedStatement("SELECT * FROM source");
-        List<Map<String, String>> targetRows = db.executePreparedStatement("SELECT * FROM target");
+        List<Map<String, String>> sourceRows = db.query("SELECT * FROM source");
+        List<Map<String, String>> targetRows = db.query("SELECT * FROM target");
 
         // Completeness check: Assert that both source and target are of same size.
         assertEquals(sourceRows.size(), targetRows.size());
@@ -110,8 +110,8 @@ class DBConnectionFailingTest {
         // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
         // Assert: Get source and target data to compare
-        List<Map<String, String>> sourceRows = db.executePreparedStatement("SELECT * FROM source");
-        List<Map<String, String>> targetRows = db.executePreparedStatement("SELECT * FROM target");
+        List<Map<String, String>> sourceRows = db.query("SELECT * FROM source");
+        List<Map<String, String>> targetRows = db.query("SELECT * FROM target");
 
         // Completeness check: Assert that both source and target are of same size.
         assertEquals(sourceRows.size(), targetRows.size());
@@ -128,8 +128,8 @@ class DBConnectionFailingTest {
         // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
         // Assert: Get source and target data to compare
-        List<Map<String, String>> sourceRows = db.executePreparedStatement("SELECT * FROM source");
-        List<Map<String, String>> targetRows = db.executePreparedStatement("SELECT * FROM target");
+        List<Map<String, String>> sourceRows = db.query("SELECT * FROM source");
+        List<Map<String, String>> targetRows = db.query("SELECT * FROM target");
 
         // Completeness check: Assert that both source and target are of same size.
         assertEquals(sourceRows.size(), targetRows.size());
@@ -140,7 +140,7 @@ class DBConnectionFailingTest {
 
     @AfterAll
     static void tearDownAll() {
-        db.executeUpdate("DROP TABLE source");
-        db.executeUpdate("DROP TABLE target");
+        db.update("DROP TABLE source");
+        db.update("DROP TABLE target");
     }
 }

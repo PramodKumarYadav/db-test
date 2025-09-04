@@ -22,25 +22,25 @@ class CreateExpectedCSVFileTest {
     @BeforeAll
     static void createTables() {
         // Create tables with more fields
-        db.executeUpdate(
+        db.update(
                 "CREATE TABLE student (id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
 
         // Clean tables before each test to avoid PK violation in repeated tests
-        db.executeUpdate("DELETE FROM student");
+        db.update("DELETE FROM student");
 
         // Insert 3 records directly
-        db.executeUpdate(
+        db.update(
                 "INSERT INTO student (id, first_name, last_name, age, gender) VALUES (1, 'John', 'Doe', 30, 'Male')");
-        db.executeUpdate(
+        db.update(
                 "INSERT INTO student (id, first_name, last_name, age, gender) VALUES (2, 'Jane', 'Smith', 25, 'Female')");
-        db.executeUpdate(
+        db.update(
                 "INSERT INTO student (id, first_name, last_name, age, gender) VALUES (3, 'Alex', 'Brown', 28, 'Male')");
     }
 
     @Test
     void generateExpectedCSVFileFromActualSQLOutput() throws java.io.IOException {
         // Arrange: Create expected results CSV based on actual SQL output. Later adjust the values as per requirements.
-        List<Map<String, String>> actualRows = db.executePreparedStatement("SELECT * FROM student");
+        List<Map<String, String>> actualRows = db.query("SELECT * FROM student");
 
         // Generate expected csv file.
         String expectedCSVFilePath = "src/test/resources/data/tc02-premium-customers/expected.csv";
@@ -58,7 +58,7 @@ class CreateExpectedCSVFileTest {
     void generateExpectedCSVFileFromActualSQLOutputFile() throws java.io.IOException {
         // Arrange: Create expected results CSV based on actual SQL output. Later adjust the values as per requirements.
         String outputSQLFilePath = "src/test/resources/data/tc01-new-customers/output.sql";
-        List<Map<String, String>> actualRows = db.executePreparedStatementFromFile(outputSQLFilePath);
+        List<Map<String, String>> actualRows = db.queryFromFile(outputSQLFilePath);
 
         // Generate expected csv file.
         String expectedCSVFilePath = "src/test/resources/data/tc01-new-customers/expected.csv";
@@ -74,6 +74,6 @@ class CreateExpectedCSVFileTest {
     
     @AfterAll
     static void tearDownAll() {
-        db.executeUpdate("DROP TABLE student");
+        db.update("DROP TABLE student");
     }
 }

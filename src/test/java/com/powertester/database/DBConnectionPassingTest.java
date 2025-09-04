@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.powertester.extensions.TableCompareExtension;
 import com.powertester.utils.CsvUtils;
+import com.powertester.utils.SqlUtils;
 
 @Slf4j
 class DBConnectionPassingTest {
@@ -20,48 +21,30 @@ class DBConnectionPassingTest {
 
     @BeforeAll
     static void createTables() {
-        // Create tables with more fields
-        db.executeUpdate(
-                "CREATE TABLE emp (id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
-        db.executeUpdate(
-                "CREATE TABLE customer (id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
-
-        // Clean tables before each test to avoid PK violation in repeated tests
-        db.executeUpdate("DELETE FROM emp");
-        db.executeUpdate("DELETE FROM customer");
-
-        // Insert 3 records directly
-        db.executeUpdate(
-                "INSERT INTO emp (id, first_name, last_name, age, gender) VALUES (1, 'John', 'Doe', 30, 'Male')");
-        db.executeUpdate(
-                "INSERT INTO emp (id, first_name, last_name, age, gender) VALUES (2, 'Jane', 'Smith', 25, 'Female')");
-        db.executeUpdate(
-                "INSERT INTO emp (id, first_name, last_name, age, gender) VALUES (3, 'Alex', 'Brown', 28, 'Male')");
-
-        db.executeUpdate(
-                "INSERT INTO customer (id, first_name, last_name, age, gender) VALUES (1, 'John', 'Doe', 30, 'Male')");
-        db.executeUpdate(
-                "INSERT INTO customer (id, first_name, last_name, age, gender) VALUES (2, 'Jane', 'Smith', 25, 'Female')");
-        db.executeUpdate(
-                "INSERT INTO customer (id, first_name, last_name, age, gender) VALUES (3, 'Alex', 'Brown', 28, 'Male')");
+        // Read and execute each SQL statement from input.sql
+        String sqlFilePath = "src/test/resources/data/tc03-inactive-customers/input.sql";
+        List<String> statements = SqlUtils.readSqlStatements(sqlFilePath);
+        for (String stmt : statements) {
+                db.update(stmt);
+        }
     }
 
     @Test
     void testCompareEmpAndCustomerTables() {
-            // Arrange: input (could be done at a test, class or at project level)
+        // Arrange: input (could be done at a test, class or at project level)
 
-            // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
-            // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
+        // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
+        // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
-            // Assert: Get input and output data to compare
-            List<Map<String, String>> empRows = db.executePreparedStatement("SELECT * FROM emp");
-            List<Map<String, String>> customerRows = db.executePreparedStatement("SELECT * FROM customer");
+        // Assert: Get input and output data to compare
+        List<Map<String, String>> empRows = db.query("SELECT * FROM emp");
+        List<Map<String, String>> customerRows = db.query("SELECT * FROM customer");
 
-            // Completeness check: Assert that both input and output are of same size.
-            assertEquals(empRows.size(), customerRows.size());
+        // Completeness check: Assert that both input and output are of same size.
+        assertEquals(empRows.size(), customerRows.size());
 
-            // Correctness check: Assert that both input and output has same data.
-            TableCompareExtension.captureRows(empRows, customerRows);
+        // Correctness check: Assert that both input and output has same data.
+        TableCompareExtension.captureRows(empRows, customerRows);
     }
     
     @Test
@@ -74,7 +57,9 @@ class DBConnectionPassingTest {
         // Assert: Get input and output data to compare
         String expectedCSVFilePath = "src/test/resources/data/tc03-inactive-customers/expected.csv";
         List<Map<String, String>> expectedCustomers = CsvUtils.readCsvToMapList(expectedCSVFilePath);
-        List<Map<String, String>> actualCustomers = db.executePreparedStatement("SELECT * FROM customer");
+
+        String outputSQLFilePath = "src/test/resources/data/tc03-inactive-customers/output.sql";
+        List<Map<String, String>> actualCustomers = db.queryFromFile(outputSQLFilePath);
 
         // Completeness check: Assert that both input and output are of same size.
         assertEquals(expectedCustomers.size(), actualCustomers.size());
@@ -86,7 +71,7 @@ class DBConnectionPassingTest {
 
     @AfterAll
     static void tearDownAll() {
-        db.executeUpdate("DROP TABLE emp");
-        db.executeUpdate("DROP TABLE customer");
+        db.update("DROP TABLE emp");
+        db.update("DROP TABLE customer");
     }
 }

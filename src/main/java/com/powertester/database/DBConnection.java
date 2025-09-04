@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import com.powertester.config.TestConfig;
-import com.powertester.utils.SqlFileReader;
+import com.powertester.utils.SqlUtils;
 
 @Slf4j
 public class DBConnection {
@@ -82,7 +82,7 @@ public class DBConnection {
   }
 
   // Execute update query
-  public void executeUpdate(String sql) {
+  public void update(String sql) {
     try (Connection connection = getConnection();
         Statement statement = connection.createStatement()) {
       statement.executeUpdate(sql);
@@ -93,7 +93,7 @@ public class DBConnection {
 
   // Preferred option 1: Execute a prepared statement and return the resultSet data as a list of map
   // of column name and value
-  public List<Map<String, String>> executePreparedStatement(String sql, String... parameters) {
+  public List<Map<String, String>> query(String sql, String... parameters) {
     try (Connection connection = getConnection();
         PreparedStatement statement = connection.prepareStatement(sql)) {
 
@@ -112,9 +112,9 @@ public class DBConnection {
   }
 
   // Create another method for executePreparedStatement which accepts file paths that contains SQLs to execute
-  public List<Map<String, String>> executePreparedStatementFromFile(String filePath) {
-    String sql = SqlFileReader.readSqlFromFile(filePath);
-    return executePreparedStatement(sql);
+  public List<Map<String, String>> queryFromFile(String filePath) {
+    String sql = SqlUtils.readSqlFromFile(filePath);
+    return query(sql);
   }
 
   private static List<Map<String, String>> getResultListFromResultSet(ResultSet resultSet)
