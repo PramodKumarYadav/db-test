@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.powertester.extensions.TableCompareExtension;
 import com.powertester.utils.CsvUtils;
-import com.powertester.utils.SqlUtils;
 
 @Slf4j
 class DBConnectionPassingTest {
@@ -23,12 +22,11 @@ class DBConnectionPassingTest {
     static void createTables() {
         // Read and execute each SQL statement from input.sql
         String sqlFilePath = "src/test/resources/data/tc03-inactive-customers/input.sql";
-        List<String> statements = SqlUtils.readSqlStatements(sqlFilePath);
-        db.update(statements);
+        db.updateFromFile(sqlFilePath);
     }
 
     @Test
-    void testCompareEmpAndCustomerTables() {
+    void compareOutputOfTwoSQLStatements() {
         // Arrange: input (could be done at a test, class or at project level)
 
         // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
@@ -46,7 +44,7 @@ class DBConnectionPassingTest {
     }
     
     @Test
-    void testUsingExpectedCustomerCSVAndActualSQLOutput() throws java.io.IOException {
+    void compareOutputOfSQLStatementWithAExpectedCSVFile() throws java.io.IOException {
         // Arrange: input (could be done at a test, class or at project level)
 
         // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
@@ -54,7 +52,7 @@ class DBConnectionPassingTest {
 
         // Assert: Get input and output data to compare
         String expectedCSVFilePath = "src/test/resources/data/tc03-inactive-customers/expected.csv";
-        List<Map<String, String>> expectedCustomers = CsvUtils.readCsvToMapList(expectedCSVFilePath);
+        List<Map<String, String>> expectedCustomers = CsvUtils.convertCsvToListOfMap(expectedCSVFilePath);
 
         String outputSQLFilePath = "src/test/resources/data/tc03-inactive-customers/output.sql";
         List<Map<String, String>> actualCustomers = db.queryFromFile(outputSQLFilePath);

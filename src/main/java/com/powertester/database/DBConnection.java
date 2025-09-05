@@ -5,6 +5,8 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import com.powertester.config.TestConfig;
-import com.powertester.utils.SqlUtils;
 
 @Slf4j
 public class DBConnection {
@@ -81,13 +82,6 @@ public class DBConnection {
     return connection;
   }
 
-  // Execute multiple update queries
-  public void update(List<String> sqlStatements) {
-    for (String sql : sqlStatements) {
-      update(sql);
-    }
-  }
-  
   // Execute update query
   public void update(String sql) {
     try (Connection connection = getConnection();
@@ -98,7 +92,39 @@ public class DBConnection {
     }
   }
 
-  
+  public void updateFromFile(String filePath) {
+    List<String> statements = extractSqlStatements(filePath);
+    update(statements);
+  }
+
+  private static List<String> extractSqlStatements(String sqlFilePath) {
+      List<String> statements = new ArrayList<>();
+      try (BufferedReader reader = new BufferedReader(new FileReader(sqlFilePath))) {
+          StringBuilder queryBuilder = new StringBuilder();
+          String line;
+          while ((line = reader.readLine()) != null) {
+              line = line.trim();
+              if (line.isEmpty() || line.startsWith("--")) continue;
+              queryBuilder.append(line);
+              if (line.endsWith(";")) {
+                  statements.add(queryBuilder.toString().replace(";", ""));
+                  queryBuilder.setLength(0);
+              } else {
+                  queryBuilder.append(" ");
+              }
+          }
+      } catch (Exception e) {
+          throw new SqlFileReadException("Failed to read SQL file: " + sqlFilePath, e);
+      }
+      return statements;
+  }
+
+  // Execute multiple update queries
+  private void update(List<String> sqlStatements) {
+    for (String sql : sqlStatements) {
+      update(sql);
+    }
+  }
 
   // Preferred option 1: Execute a prepared statement and return the resultSet data as a list of map
   // of column name and value
@@ -122,7 +148,7 @@ public class DBConnection {
 
   // Create another method for executePreparedStatement which accepts file paths that contains SQLs to execute
   public List<Map<String, String>> queryFromFile(String filePath) {
-    String sql = SqlUtils.readSqlFromFile(filePath);
+    String sql = extractSqlStatements(filePath).get(0);
     return query(sql);
   }
 
@@ -182,4 +208,13 @@ public class DBConnection {
     log.info("Closing Hikari datasource pool");
     dataSource.close();
   }
+}
+
+/**
+ * Custom exception for SQL file reading errors.
+ */
+class SqlFileReadException extends RuntimeException {
+    public SqlFileReadException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

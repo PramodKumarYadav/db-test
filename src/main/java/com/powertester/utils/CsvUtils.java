@@ -17,7 +17,7 @@ public class CsvUtils {
     private CsvUtils() {}
 
     // Read CSV into List<Map<String, String>>
-    public static List<Map<String, String>> readCsvToMapList(String filePath) throws IOException {
+    public static List<Map<String, String>> convertCsvToListOfMap(String filePath) throws IOException {
         List<Map<String, String>> rows = new ArrayList<>();
 
         CSVFormat csvFormat = CSVFormat.Builder.create()
@@ -39,7 +39,7 @@ public class CsvUtils {
     }
 
     // Write List<Map<String, String>> to CSV
-    public static void writeMapListToCsv(String filePath, List<Map<String, String>> data) throws IOException {
+    public static void saveDataToCsvFile(String filePath, List<Map<String, String>> data) throws IOException {
         if (data.isEmpty()) return;
 
         CSVFormat csvFormat = CSVFormat.Builder.create()

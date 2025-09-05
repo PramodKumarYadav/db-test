@@ -21,51 +21,23 @@ class CreateExpectedCSVFileTest {
 
     @BeforeAll
     static void createTables() {
-        // Create tables with more fields
-        db.update(
-                "CREATE TABLE student (id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10))");
-
-        // Clean tables before each test to avoid PK violation in repeated tests
-        db.update("DELETE FROM student");
-
-        // Insert 3 records directly
-        db.update(
-                "INSERT INTO student (id, first_name, last_name, age, gender) VALUES (1, 'John', 'Doe', 30, 'Male')");
-        db.update(
-                "INSERT INTO student (id, first_name, last_name, age, gender) VALUES (2, 'Jane', 'Smith', 25, 'Female')");
-        db.update(
-                "INSERT INTO student (id, first_name, last_name, age, gender) VALUES (3, 'Alex', 'Brown', 28, 'Male')");
+        // Read and execute each SQL statement from input.sql
+        String sqlFilePath = "src/test/resources/data/create-expected-csv-file-test/input.sql";
+        db.updateFromFile(sqlFilePath);
     }
 
     @Test
     void generateExpectedCSVFileFromActualSQLOutput() throws java.io.IOException {
         // Arrange: Create expected results CSV based on actual SQL output. Later adjust the values as per requirements.
-        List<Map<String, String>> actualRows = db.query("SELECT * FROM student");
-
-        // Generate expected csv file.
-        String expectedCSVFilePath = "src/test/resources/data/tc02-premium-customers/expected.csv";
-        CsvUtils.writeMapListToCsv(expectedCSVFilePath, actualRows);
-
-        // Get the generated CSV file
-        List<Map<String, String>> expectedRows = CsvUtils.readCsvToMapList(expectedCSVFilePath);
-        TableCompareExtension.captureRows(expectedRows, actualRows);
-
-        // Completeness check: Assert that both input and output are of same size.
-        assertEquals(expectedRows.size(), actualRows.size());
-    }
-
-    @Test
-    void generateExpectedCSVFileFromActualSQLOutputFile() throws java.io.IOException {
-        // Arrange: Create expected results CSV based on actual SQL output. Later adjust the values as per requirements.
-        String outputSQLFilePath = "src/test/resources/data/tc01-new-customers/output.sql";
+        String outputSQLFilePath = "src/test/resources/data/create-expected-csv-file-test/output.sql";
         List<Map<String, String>> actualRows = db.queryFromFile(outputSQLFilePath);
 
         // Generate expected csv file.
-        String expectedCSVFilePath = "src/test/resources/data/tc01-new-customers/expected.csv";
-        CsvUtils.writeMapListToCsv(expectedCSVFilePath, actualRows);
+        String expectedCSVFilePath = "src/test/resources/data/create-expected-csv-file-test/expected.csv";
+        CsvUtils.saveDataToCsvFile(expectedCSVFilePath, actualRows);
 
         // Get the generated CSV file
-        List<Map<String, String>> expectedRows = CsvUtils.readCsvToMapList(expectedCSVFilePath);
+        List<Map<String, String>> expectedRows = CsvUtils.convertCsvToListOfMap(expectedCSVFilePath);
         TableCompareExtension.captureRows(expectedRows, actualRows);
 
         // Completeness check: Assert that both input and output are of same size.
