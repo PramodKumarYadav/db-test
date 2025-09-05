@@ -21,10 +21,33 @@ class DBConnectionPassingTest {
     @BeforeAll
     static void createTables() {
         // Read and execute each SQL statement from input.sql
-        String sqlFilePath = "src/test/resources/data/tc03-inactive-customers/input.sql";
+        String sqlFilePath = "src/test/resources/data/db-connection-passing-test/input.sql";
         db.updateFromFile(sqlFilePath);
     }
 
+    // For a typical ETL scenario. Where input data is transformed and loaded into target system.
+    @Test
+    void compareOutputOfSQLStatementWithAExpectedCSVFile() throws java.io.IOException {
+        // Arrange: input (could be done at a test, class or at project level)
+
+        // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
+        // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
+
+        // Assert: Get input and output data to compare
+        String expectedCSVFilePath = "src/test/resources/data/db-connection-passing-test/expected.csv";
+        List<Map<String, String>> expectedCustomers = CsvUtils.convertCsvToListOfMap(expectedCSVFilePath);
+
+        String outputSQLFilePath = "src/test/resources/data/db-connection-passing-test/output.sql";
+        List<Map<String, String>> actualCustomers = db.queryFromFile(outputSQLFilePath);
+
+        // Completeness check: Assert that both input and output are of same size.
+        assertEquals(expectedCustomers.size(), actualCustomers.size());
+
+        // Correctness check: Assert that both input and output has same data.
+        TableCompareExtension.captureRows(expectedCustomers, actualCustomers);
+    }
+
+    // For a typical EL scenario. Where input data is extracted and loaded (1:1) from source system(s) to target system.
     @Test
     void compareOutputOfTwoSQLStatements() {
         // Arrange: input (could be done at a test, class or at project level)
@@ -43,28 +66,6 @@ class DBConnectionPassingTest {
         TableCompareExtension.captureRows(empRows, customerRows);
     }
     
-    @Test
-    void compareOutputOfSQLStatementWithAExpectedCSVFile() throws java.io.IOException {
-        // Arrange: input (could be done at a test, class or at project level)
-
-        // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
-        // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
-
-        // Assert: Get input and output data to compare
-        String expectedCSVFilePath = "src/test/resources/data/tc03-inactive-customers/expected.csv";
-        List<Map<String, String>> expectedCustomers = CsvUtils.convertCsvToListOfMap(expectedCSVFilePath);
-
-        String outputSQLFilePath = "src/test/resources/data/tc03-inactive-customers/output.sql";
-        List<Map<String, String>> actualCustomers = db.queryFromFile(outputSQLFilePath);
-
-        // Completeness check: Assert that both input and output are of same size.
-        assertEquals(expectedCustomers.size(), actualCustomers.size());
-
-        // Correctness check: Assert that both input and output has same data.
-        TableCompareExtension.captureRows(expectedCustomers, actualCustomers);
-    }
-
-
     @AfterAll
     static void tearDownAll() {
         db.update("DROP TABLE emp");
