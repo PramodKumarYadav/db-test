@@ -1,4 +1,3 @@
 com.powertester.extensions.LoggingExtension
 com.powertester.extensions.TableCompareExtension
-com.powertester.extensions.TestRunExtension
 com.powertester.extensions.TimingExtension
