@@ -62,7 +62,7 @@ public class TableCompareExtension
         String reportLink = reportPath.toAbsolutePath().toString();
         File report = new File(reportLink);
         if (report.isFile()) {
-            Allure.addAttachment("Table Compare Report", new FileInputStream(report));
+            Allure.addAttachment("Table Compare Report: " + report.getName(), new FileInputStream(report));
         } else {
             Allure.step("No table-compare HTML found at: " + report.getAbsolutePath());
         }
@@ -286,7 +286,15 @@ public class TableCompareExtension
     private static Path writeHtmlFile(ExtensionContext testContext, String html) throws IOException {
         String className = testContext.getRequiredTestClass().getSimpleName();
         String methodName = testContext.getRequiredTestMethod().getName();
-        String fileName = safeFileName(methodName) + ".html";
+        String displayName = testContext.getDisplayName();
+        log.info("displayName: {}", displayName);
+        // If display name has word repetition, then add display name. else skip it.
+        if (displayName.contains("repetition")) {
+            displayName = "-" + displayName;
+        } else {
+            displayName = "";
+        }
+        String fileName = safeFileName(methodName + displayName) + ".html";
 
         Path reportDirectory = Paths.get(REPORT_DIR, className);
         Files.createDirectories(reportDirectory);
