@@ -13,7 +13,7 @@ import com.powertester.database.DBConnection;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class GlobalSuiteListener implements LauncherSessionListener {
+public class TestRunListener implements LauncherSessionListener {
   private long testRunStartTime;
   private static final Path TEST_REPORT_PATH = Paths.get(".", "test-reports");
 
