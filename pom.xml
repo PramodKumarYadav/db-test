@@ -12,8 +12,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Versions (pick stable lines) -->
-    <!-- NOTE: Allure is locked in to junit 5.11.X version. If we bump up version, we need to check compatibility with Allure -->
-    <junit.version>5.11.4</junit.version>
+    <!-- NOTE: Allure is locked in to junit 5.X.X version. If we bump up version, we need to check compatibility with Allure -->
+    <junit-bom.version>5.13.4</junit-bom.version>
     <allure.version>2.29.1</allure.version>
     <aspectj.version>1.9.22.1</aspectj.version>
 
@@ -36,16 +36,28 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+    </dependency>
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
-    <!-- JUnit 5 -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>${junit.version}</version>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher -->
+      <dependency>
+          <groupId>org.junit.platform</groupId>
+          <artifactId>junit-platform-launcher</artifactId>
+      </dependency>
 
     <!-- https://mvnrepository.com/artifact/io.qameta.allure/allure-junit5 -->
     <dependency>
