@@ -71,6 +71,17 @@ public class DBConnection {
     return dataSource;
   }
 
+  public void logConnectionPoolStatus() {
+    if (dataSource != null && dataSource.getHikariPoolMXBean() != null) {
+      int active = dataSource.getHikariPoolMXBean().getActiveConnections();
+      int idle = dataSource.getHikariPoolMXBean().getIdleConnections();
+      int total = dataSource.getHikariPoolMXBean().getTotalConnections();
+      log.info("HikariCP Pool Status - Active: {}, Idle: {}, Total: {}", active, idle, total);
+    } else {
+      log.warn("HikariCP Pool MXBean not available.");
+    }
+  }
+  
   public Connection getConnection() throws SQLException {
     Connection connection = dataSource.getConnection();
     try (Statement statement = connection.createStatement()) {

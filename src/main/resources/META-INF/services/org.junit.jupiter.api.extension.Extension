@@ -1,3 +1,4 @@
 com.powertester.extensions.LoggingExtension
 com.powertester.extensions.TableCompareExtension
 com.powertester.extensions.TimingExtension
+com.powertester.extensions.DBConnectionPoolLoggerExtension

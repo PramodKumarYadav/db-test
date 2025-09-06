@@ -2,6 +2,7 @@ package com.powertester.database;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +49,7 @@ class DBConnectionPassingTest {
     }
 
     // For a typical EL scenario. Where input data is extracted and loaded (1:1) from source system(s) to target system.
-    @Test
+    @RepeatedTest(500) // Run this test multiple times to see connection pool stats after each run.
     void compareOutputOfTwoSQLStatements() {
         // Arrange: input (could be done at a test, class or at project level)
 
