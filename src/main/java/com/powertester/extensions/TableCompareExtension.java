@@ -23,41 +23,17 @@ public class TableCompareExtension
     // Thread-local storage so each test can safely pass its rows to the extension
     private static final ThreadLocal<Captured> TL_CAPTURED = new ThreadLocal<>();
 
-    private static final String DEFAULT_ID_FIELD = "ID";
-
-    // Optional: fields to ignore (you can change/add via setter if you like)
-    private static final Set<String> DEFAULT_IGNORED_FIELDS = new HashSet<>(Collections.singletonList(DEFAULT_ID_FIELD));
 
     public static void captureRows(List<Map<String, String>> expectedRows,
             List<Map<String, String>> actualRows) {
-        TL_CAPTURED.set(new Captured(expectedRows, actualRows, DEFAULT_IGNORED_FIELDS, DEFAULT_ID_FIELD));
+        TL_CAPTURED.set(new Captured(expectedRows, actualRows, null));
     }
 
     /** Overload if you want custom ignored fields per test */
     public static void captureRows(List<Map<String, String>> expectedRows,
             List<Map<String, String>> actualRows,
             Set<String> ignoredFields) {
-        TL_CAPTURED.set(new Captured(expectedRows, actualRows,
-                ignoredFields == null ? DEFAULT_IGNORED_FIELDS : ignoredFields, DEFAULT_ID_FIELD));
-    }
-
-    public static void captureRows(List<Map<String, String>> expectedRows,
-            List<Map<String, String>> actualRows,
-            Set<String> ignoredFields, String idField) {
-
-        // ID should be upper case for it to be ignored.
-        String effectiveIdField = idField == null ? DEFAULT_ID_FIELD : idField.toUpperCase();
-
-        // ensure idField is always ignored in comparisons
-        Set<String> effectiveIgnoredFields = new HashSet<>();
-        if (ignoredFields != null) {
-            effectiveIgnoredFields.addAll(ignoredFields);
-        } else {
-            effectiveIgnoredFields.addAll(DEFAULT_IGNORED_FIELDS);
-        }
-        effectiveIgnoredFields.add(effectiveIdField);
-
-        TL_CAPTURED.set(new Captured(expectedRows, actualRows, effectiveIgnoredFields, effectiveIdField));
+        TL_CAPTURED.set(new Captured(expectedRows, actualRows,ignoredFields));
     }
     
     @Override
@@ -75,7 +51,7 @@ public class TableCompareExtension
         }
 
         // Build comparison model
-        ComparisonResult result = compare(captured.expectedRows, captured.actualRows, captured.ignoredFields, captured.idField);
+        ComparisonResult result = compare(captured.expectedRows, captured.actualRows, captured.ignoredFields);
 
         // Render HTML
         String html = renderHtml(context, result);
@@ -114,13 +90,11 @@ public class TableCompareExtension
         final List<Map<String, String>> expectedRows;
         final List<Map<String, String>> actualRows;
         final Set<String> ignoredFields;
-        final String idField;
 
-        Captured(List<Map<String, String>> in, List<Map<String, String>> out, Set<String> ignored, String id) {
+        Captured(List<Map<String, String>> in, List<Map<String, String>> out, Set<String> ignored) {
             this.expectedRows = in == null ? List.of() : in;
             this.actualRows = out == null ? List.of() : out;
             this.ignoredFields = ignored == null ? Set.of() : ignored;
-            this.idField = id;
         }
     }
 
@@ -137,11 +111,9 @@ public class TableCompareExtension
     }
 
     private static class Row {
-        final String id; // if present
         final List<Cell> cells;
 
-        Row(String id, List<Cell> cells) {
-            this.id = id;
+        Row(List<Cell> cells) {
             this.cells = cells;
         }
     }
@@ -166,7 +138,7 @@ public class TableCompareExtension
 
     private static ComparisonResult compare(List<Map<String, String>> expectedRows,
             List<Map<String, String>> actualRows,
-            Set<String> ignoredFields, String idField) {
+            Set<String> ignoredFields) {
 
         // Compare up to the smaller of the two lists to allow for
         // comparison if there are differences in row sizes in input and output.
@@ -176,22 +148,14 @@ public class TableCompareExtension
         // Determine field order from union of keys in first input row (fallback to
         // output if needed)
         Set<String> union = new LinkedHashSet<>();
-        if (!expectedRows.isEmpty())
-            union.addAll(expectedRows.get(0).keySet());
-        else if (!actualRows.isEmpty())
-            union.addAll(actualRows.get(0).keySet());
-
-        // plus any extra keys found (it could highlight keys that are missed from comparisons)
         for (int i = 0; i < rowsCompared; i++) {
             union.addAll(expectedRows.get(i).keySet());
             union.addAll(actualRows.get(i).keySet());
         }
 
-        // remove ignored fields, but keep a separate ID (if present) for display
-        boolean hasId = union.contains(idField);
+        // remove ignored fields
         List<String> fields = union.stream()
                 .filter(k -> !ignoredFields.contains(k))
-                // .sorted() // optional: sort fields alphabetically (for now, I want to keep it as it shows in the table)
                 .collect(Collectors.toList());
 
         int diffs = 0;
@@ -199,23 +163,19 @@ public class TableCompareExtension
         List<Row> rows = new ArrayList<>();
 
         for (int i = 0; i < rowsCompared; i++) {
-            Map<String, String> currentInputRow = expectedRows.get(i);
-            Map<String, String> currentOutputRow = actualRows.get(i);
-
-            String id = hasId ? Objects.toString(currentInputRow.getOrDefault(idField, currentOutputRow.get(idField)), "") : null;
+            Map<String, String> inRow = expectedRows.get(i);
+            Map<String, String> outRow = actualRows.get(i);
 
             List<Cell> cells = new ArrayList<>();
             for (String fieldName : fields) {
-                String currentInputFieldsValue = currentInputRow.get(fieldName);
-                String currentOutputFieldsValue = currentOutputRow.get(fieldName);
-                Cell comparisonCell = new Cell(currentInputFieldsValue, currentOutputFieldsValue);
-                cells.add(comparisonCell);
+                String inVal = inRow.get(fieldName);
+                String outVal = outRow.get(fieldName);
+                Cell cell = new Cell(inVal, outVal);
+                cells.add(cell);
                 cellsCompared++;
-                if (!comparisonCell.equal) {
-                    diffs++;
-                }
+                if (!cell.equal) diffs++;
             }
-            rows.add(new Row(id, cells));
+            rows.add(new Row(cells));
         }
 
         return new ComparisonResult(fields, rows, rowsCompared, cellsCompared, diffs);
@@ -238,13 +198,9 @@ public class TableCompareExtension
         stringBuilder.append(renderMetaInfo(className, testName, displayName, timestamp));
         stringBuilder.append(renderLegend(comparisonResult.rowsCompared, comparisonResult.cellsCompared, comparisonResult.diffs));
 
-        boolean showId = comparisonResult.rows.stream().anyMatch(row -> row.id != null);
-        String idFieldName = testContext instanceof ExtensionContext ?
-            (TL_CAPTURED.get()).idField : DEFAULT_ID_FIELD;
-
         stringBuilder.append("<table>");
-        stringBuilder.append(renderTableHeader(comparisonResult.fields, showId, idFieldName));
-        stringBuilder.append(renderTableBody(comparisonResult.rows, showId));
+        stringBuilder.append(renderTableHeader(comparisonResult.fields));
+        stringBuilder.append(renderTableBody(comparisonResult.rows));
         stringBuilder.append("</table>");
         stringBuilder.append("</body></html>");
         return stringBuilder.toString();
@@ -284,12 +240,9 @@ public class TableCompareExtension
                 "</div>";
     }
 
-    private static String renderTableHeader(List<String> fields, boolean showId, String idFieldName) {
+    private static String renderTableHeader(List<String> fields) {
         StringBuilder sb = new StringBuilder();
         sb.append("<thead><tr>");
-        if (showId) {
-            sb.append("<th>").append(escape(idFieldName)).append("</th>");
-        }
         for (String fieldName : fields) {
             sb.append("<th>").append(escape(fieldName)).append("</th>");
         }
@@ -297,14 +250,11 @@ public class TableCompareExtension
         return sb.toString();
     }
 
-    private static String renderTableBody(List<Row> rows, boolean showId) {
+    private static String renderTableBody(List<Row> rows) {
         StringBuilder sb = new StringBuilder();
         sb.append("<tbody>");
         for (Row row : rows) {
             sb.append("<tr>");
-            if (showId) {
-                sb.append("<td>").append(escape(row.id == null ? "" : row.id)).append("</td>");
-            }
             for (Cell resultCell : row.cells) {
                 String cls = resultCell.equal ? "equal" : "diff";
                 sb.append("<td class='").append(cls).append("'>");

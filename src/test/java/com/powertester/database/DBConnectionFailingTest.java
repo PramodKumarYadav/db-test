@@ -61,28 +61,7 @@ class DBConnectionFailingTest {
         assertEquals(sourceRows.size(), targetRows.size());
 
         // Correctness check: Assert that both source and target has same data.
-        TableCompareExtension.captureRows(sourceRows, targetRows, Set.of("AGE", "GENDER"), "ID");
-    }
-
-    @Test
-    void testCompareTwoSQLsShowAnchorKeyButIgnoreAnchorFromComparison02() throws java.io.IOException {
-        // Arrange: input (could be done at a test, class or at project level)
-
-        // Act: (run the application to process input data). If the app is real time like APIs, this can be done at the test level. 
-        // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
-
-        // Assert: Get input and output data to compare
-        String expectedCSVFilePath = "src/test/resources/data/db-connection-failing-test/02/expected.csv";
-        List<Map<String, String>> sourceRows = CsvUtils.convertCsvToListOfMap(expectedCSVFilePath);
-
-        String outputSQLFilePath = "src/test/resources/data/db-connection-failing-test/02/output.sql";
-        List<Map<String, String>> targetRows = db.queryFromFile(outputSQLFilePath);
-
-        // Completeness check: Assert that both source and target are of same size.
-        assertEquals(sourceRows.size(), targetRows.size());
-
-        // Correctness check: Assert that both source and target has same data.
-        TableCompareExtension.captureRows(sourceRows, targetRows, null, "ID");
+        TableCompareExtension.captureRows(sourceRows, targetRows, Set.of("AGE", "GENDER"));
     }
 
     @AfterAll
