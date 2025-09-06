@@ -11,7 +11,6 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class TableCompareExtension
@@ -156,7 +155,7 @@ public class TableCompareExtension
         // remove ignored fields
         List<String> fields = union.stream()
                 .filter(k -> !ignoredFields.contains(k))
-                .collect(Collectors.toList());
+                .toList();
 
         int diffs = 0;
         int cellsCompared = 0;
