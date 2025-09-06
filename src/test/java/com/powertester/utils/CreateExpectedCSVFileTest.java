@@ -46,6 +46,6 @@ class CreateExpectedCSVFileTest {
     
     @AfterAll
     static void tearDownAll() {
-        db.update("DROP TABLE student");
+        db.update("DROP TABLE student;");
     }
 }

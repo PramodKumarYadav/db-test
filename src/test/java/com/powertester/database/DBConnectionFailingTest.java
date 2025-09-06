@@ -33,8 +33,8 @@ class DBConnectionFailingTest {
         // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
         // Assert: Get source and target data to compare
-        List<Map<String, String>> sourceRows = db.query("SELECT * FROM source");
-        List<Map<String, String>> targetRows = db.query("SELECT * FROM target");
+        List<Map<String, String>> sourceRows = db.query("SELECT * FROM source;");
+        List<Map<String, String>> targetRows = db.query("SELECT * FROM target;");
 
         // Completeness check: Assert that both source and target are of same size.
         assertEquals(sourceRows.size(), targetRows.size());
@@ -87,7 +87,7 @@ class DBConnectionFailingTest {
 
     @AfterAll
     static void tearDownAll() {
-        db.update("DROP TABLE source");
-        db.update("DROP TABLE target");
+        db.update("DROP TABLE source;");
+        db.update("DROP TABLE target;");
     }
 }

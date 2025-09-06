@@ -56,8 +56,8 @@ class DBConnectionPassingTest {
         // But if the app works as a batch and takes significant time to process data, it might also make sense to do this at the project level.
 
         // Assert: Get input and output data to compare
-        List<Map<String, String>> empRows = db.query("SELECT * FROM emp");
-        List<Map<String, String>> customerRows = db.query("SELECT * FROM customer");
+        List<Map<String, String>> empRows = db.query("SELECT * FROM emp;");
+        List<Map<String, String>> customerRows = db.query("SELECT * FROM customer;");
 
         // Completeness check: Assert that both input and output are of same size.
         assertEquals(empRows.size(), customerRows.size());
@@ -68,7 +68,7 @@ class DBConnectionPassingTest {
     
     @AfterAll
     static void tearDownAll() {
-        db.update("DROP TABLE emp");
-        db.update("DROP TABLE customer");
+        db.update("DROP TABLE emp;");
+        db.update("DROP TABLE customer;");
     }
 }
