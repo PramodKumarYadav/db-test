@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+// Launcher comes from https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher
+// Note for self: Do remember to add this dependency in your pom.xml if you want to use it in another project.
 import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.LauncherSessionListener;
 
