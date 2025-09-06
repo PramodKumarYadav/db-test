@@ -1,3 +1,5 @@
+-- All SQLs must end with a semicolon (;)
+
 -- Create tables with more fields
 CREATE TABLE student (id INT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255), age INT, gender VARCHAR(10));
 
